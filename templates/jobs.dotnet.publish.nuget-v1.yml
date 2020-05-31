@@ -1,0 +1,46 @@
+parameters:
+- name: packagesToPack
+  type: string
+  default:
+- name: publishVstsFeed
+  type: string
+  default: ''
+- name: publishFeedCredentials
+  type: string
+  default: ''
+
+jobs:
+- job: PublishJob
+  #pool:
+  #  name: $(poolName)
+  #  vmImage: $(vmImage)
+  variables:
+    Version.Major: 0
+    Version.Minor: 0
+    Version.PackageMajorMinor: $(Version.Minor).$(Version.Major)-$(packagesToPack)
+    Version.Revision: $[counter(variables['Version.PackageMajorMinor'], 0)]
+    PackageVersion: $(Version.Major).$(Version.Minor).$(Version.Revision)
+  steps:
+
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: packagesToPack
+      Value: ${{ parameters.packagesToPack }}
+
+  - template: steps.dotnet.publish.nuget-v1.yml
+    parameters:
+      packagesToPack: ${{ parameters.packagesToPack }}
+      publishVstsFeed: ${{ parameters.publishVstsFeed }}
+      publishFeedCredentials: ${{ parameters.publishFeedCredentials }}
+
+#- deployment: PublishJob
+#  pool:
+#    name: $(poolName)
+#    #vmImage: $(vmImage)
+#  timeoutInMinutes: 5
+#  environment: NuGet
+#  strategy:
+#    runOnce:
+#      deploy:
+#        steps:
+#        - template: steps.dotnet.publish.nuget-v1.yml@sharedTemplates

@@ -1,0 +1,42 @@
+parameters:
+- name: Name
+  type: string
+  default: ''
+- name: Value
+  type: string
+  default: ''
+
+steps:
+#https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#passing-parameters
+- bash: |
+    if [ -z "$VALUE" ]; then
+      echo "##vso[task.logissue type=error;]Missing template parameter \"$NAME\""
+      echo "##vso[task.complete result=Failed;]"
+    fi
+  env:
+    NAME: ${{ parameters.Name }}
+    VALUE: ${{ parameters.Value }}
+  displayName: Check for required parameter '${{ parameters.Name }}'
+
+#- task: PowerShell@2
+#  displayName: Check for required parameter '${{ parameters.Name }}'
+#  inputs:
+#    targetType: inline
+#    script: |
+#      if ([string]::IsNullOrEmpty('${{ parameters.Value }}'')) {
+#        Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '${{ parameters.Name }}'"
+#        Write-Host "##vso[task.complete result=Failed;]"
+#        exit 1
+#      }
+#    pwsh: true
+
+#- pwsh: |
+#    if ([string]::IsNullOrEmpty($env:VALUE)) {
+#      Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '$($env:NAME)'"
+#      Write-Host "##vso[task.complete result=Failed;]"
+#      exit 1
+#    }
+#  env:
+#    NAME: ${{ parameters.Name }}
+#    VALUE: ${{ parameters.Value }}
+#  displayName: Check for required parameter '${{ parameters.Name }}'

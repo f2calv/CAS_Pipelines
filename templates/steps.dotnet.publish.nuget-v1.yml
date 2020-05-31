@@ -1,0 +1,63 @@
+parameters:
+- name: packagesToPack
+  type: string
+  default: ''
+- name: publishVstsFeed
+  type: string
+  default: ''
+- name: publishFeedCredentials
+  type: string
+  default: ''
+
+steps:
+- download: none
+- checkout: self
+
+#deprecated - now using .net core 3.1 pre-installed on self-hosted agent
+#- task: UseDotNet@2
+#  displayName: Use dotnet sdk 3.x
+#  inputs:
+#    version: 3.x
+#    includePreviewVersions: true
+- task: NuGetAuthenticate@0 #always run nuget auth to allow access to private azure artifact feed
+
+- task: DotNetCoreCLI@2
+  displayName: dotnet pack **/${{ parameters.packagesToPack }}
+  inputs:
+    command: pack
+    configuration: $(buildConfiguration)
+    packagesToPack: '**/${{ parameters.packagesToPack }}' # Required when command == pack
+    outputDir: $(Build.ArtifactStagingDirectory)
+    #packDirectory: $(Build.ArtifactStagingDirectory)   #this should be the Pipeline download directory but didn't figure out how to skip the second build yet
+    versioningScheme: byEnvVar      # Options: off, byPrereleaseNumber, byEnvVar, byBuildNumber
+    versionEnvVar: PackageVersion   # Required when versioningScheme == byEnvVar
+    verbosityPack: normal
+    #buildProperties: SymbolPackageFormat=snupkg    #not needed because elements added to csproj
+    includeSymbols: true
+
+#- ${{ if ne(parameters.publishVstsFeed, '') }}:
+#  - task: DotNetCoreCLI@2
+#    displayName: dotnet push **/${{ parameters.packagesToPack }} internal
+#    inputs:
+#      command: push
+#      #searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg;-:$(Build.ArtifactStagingDirectory)/*.Tests.nupkg'
+#      searchPatternPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg
+#      nuGetFeedType: internal
+#      feedPublish: ${{ parameters.publishVstsFeed }}
+#      arguments: --skip-duplicate
+#script: 
+#- pwsh:
+#dotnet nuget push $(PATH_PIPELINE_ARTIFACT_NAME)/**/*.nupkg --source $(NUGET_FEED) --api-key $(NUGET_API_KEY) --skip-duplicate
+- ${{ if ne(parameters.publishVstsFeed, '') }}:
+  - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --source ${{ parameters.publishVstsFeed }} --api-key VSTS --skip-duplicate
+
+- ${{ if ne(parameters.publishFeedCredentials, '') }}:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet push **/${{ parameters.packagesToPack }} external
+    inputs:
+      command: push
+      #searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg;-:$(Build.ArtifactStagingDirectory)/*.Tests.nupkg'
+      searchPatternPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg
+      nuGetFeedType: external
+      publishFeedCredentials: ${{ parameters.publishFeedCredentials }}
+      arguments: --skip-duplicate

@@ -1,0 +1,37 @@
+steps:
+#https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops
+
+#https://alwaysupalwayson.blogspot.com/2018/10/azure-devops-to-deploy-your.html
+
+#this is now part of my AKS agent
+#- task: HelmInstaller@1
+#  displayName: Install Helm 3 (latest)
+#  continueOnError: true
+
+#- task: HelmDeploy@0
+#  displayName: helm version
+#  inputs:
+#    azureSubscription: $(azureSubscription)
+#    azureResourceGroup: $(azureResourceGroup)
+#    kubernetesCluster: $(kubernetesCluster)
+#    command: version
+
+- task: HelmDeploy@0
+  displayName: helm package
+  inputs:
+    azureSubscription: $(azureSubscription)
+    azureResourceGroup: $(azureResourceGroup)
+    kubernetesCluster: $(kubernetesCluster)
+    command: package
+    chartPath: $(imageRepositoryFolder)/charts/$(imageRepository)
+    chartVersion: $(Build.BuildId)
+    destination: $(Build.ArtifactStagingDirectory)
+    save: false
+
+- task: AzureCLI@1
+  displayName: az acr helm push
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptLocation: inlineScript
+    inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(imageRepository)-$(Build.BuildId).tgz
+    #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))

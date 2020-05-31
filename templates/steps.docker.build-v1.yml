@@ -1,0 +1,90 @@
+parameters:
+  imageRepositoryFolder:
+  imageRepository:
+  azureContainerRegistry:
+  PushTagBuildNumber:
+  PushTagLatest:
+  Dockerfile: Dockerfile
+  Tag: $(Build.BuildNumber)
+
+steps:
+- template: parameter-check-v1.yml
+  parameters:
+    Name: imageRepositoryFolder
+    Value: ${{ parameters.imageRepositoryFolder }}
+
+- template: parameter-check-v1.yml
+  parameters:
+    Name: imageRepository
+    Value: ${{ parameters.imageRepository }}
+
+- template: parameter-check-v1.yml
+  parameters:
+    Name: azureContainerRegistry
+    Value: ${{ parameters.azureContainerRegistry }}
+
+- template: parameter-check-v1.yml
+  parameters:
+    Name: PushTagBuildNumber
+    Value: ${{ parameters.PushTagBuildNumber }}
+
+- template: parameter-check-v1.yml
+  parameters:
+    Name: PushTagLatest
+    Value: ${{ parameters.PushTagLatest }}
+
+
+#for custom agent KubernetesAgents (deprecated)
+#- task: DockerInstaller@0
+#  displayName: 'Docker Installer'
+#  inputs:
+#    dockerVersion: 17.09.0-ce
+#    releaseType: stable
+
+#- task: Docker@2
+#  displayName: 'Build and Push image ${{ parameters.imageRepository }}:$(Build.BuildNumber)'
+#  inputs:
+#    containerRegistry: ${{ parameters.azureContainerRegistry}}
+#    repository: ${{ parameters.imageRepository }}
+#    command: buildAndPush
+#    Dockerfile: ${{ parameters.imageRepositoryFolder}}/${{ parameters.Dockerfile }}
+#    tags: $(Build.BuildNumber)
+
+#Note: login to ACR is needed when building from base images held within ACR
+- task: Docker@2
+  displayName: Login to ACR
+  inputs:
+    command: login
+    containerRegistry: $(AzACRName)
+
+- task: Docker@1
+  displayName: 'Build image ${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+  inputs:
+    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+    command: build
+    dockerFile: ${{ parameters.imageRepositoryFolder }}/${{ parameters.Dockerfile }}
+    useDefaultContext: false
+    addDefaultLabels: false #false enables image caching when building on a self-hosted agent
+    arguments: --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
+
+- pwsh: |
+    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:latest
+  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:latest'
+
+- ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
+  - task: Docker@1
+    displayName: 'Push image (1 of 2) $(imageRepository):${{ parameters.Tag }}'
+    inputs:
+      azureSubscriptionEndpoint: $(azureSubscription)
+      azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+      imageName: '${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+      command: push
+
+- ${{ if eq(parameters.PushTagLatest, 'true') }}:
+  - task: Docker@1
+    displayName: 'Push image (2 of 2) ${{ parameters.imageRepository }}:latest'
+    inputs:
+      azureSubscriptionEndpoint: $(azureSubscription)
+      azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+      imageName: '${{ parameters.imageRepository }}:latest'
+      command: push

@@ -1,0 +1,57 @@
+parameters:
+- name: ProjectName
+  type: string
+  default:
+- name: PublishArtifact
+  type: boolean
+  default: true
+
+steps:
+- template: parameter-check-v1.yml
+  parameters:
+    Name: ProjectName
+    Value: ${{ parameters.ProjectName }}
+
+- template: parameter-check-v1.yml
+  parameters:
+    Name: PublishArtifact
+    Value: ${{ parameters.PublishArtifact }}
+
+#deprecated - now using .net core 3.1 pre-installed on self-hosted agent
+#- task: UseDotNet@2
+#  displayName: Use dotnet sdk 3.x
+#  inputs:
+#    version: 3.x
+#    includePreviewVersions: true
+
+- task: NuGetAuthenticate@0 #always run nuget auth to allow access to private Azure Artifacts feed
+
+#- task: DotNetCoreCLI@2
+#  displayName: dotnet restore
+#  inputs:
+#    command: restore
+#    #projects: ${{ parameters.ProjectName }}.sln
+#    feedsToUse: config
+#    nugetConfigPath: $(Build.SourcesDirectory)/NuGet.config
+#    projects: |
+#      **/${{ parameters.ProjectName }}.csproj
+#      **/${{ parameters.ProjectName }}.Tests.csproj
+#    #packagesDirectory: /src/packages
+
+- task: DotNetCoreCLI@2
+  displayName: dotnet build ${{ parameters.ProjectName }}.csproj
+  inputs:
+    command: build
+    #projects: ${{ parameters.ProjectName }}.sln
+    projects: |
+      **/${{ parameters.ProjectName }}.csproj
+      **/${{ parameters.ProjectName }}.Tests.csproj
+    arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
+    #packagesDirectory: /src/packages
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Pipeline Artifact: drop'
+  condition: and(succeeded(), eq('${{ parameters.PublishArtifact }}', true))
+  inputs:
+    artifactName: drop
+    path: $(Build.ArtifactStagingDirectory)

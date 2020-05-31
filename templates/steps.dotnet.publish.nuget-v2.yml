@@ -1,0 +1,42 @@
+parameters:
+- name: packagesToPack
+  type: string
+  default:
+- name: NuGetFeedUrl
+  type: string
+  default:
+- name: NuGetFeedAPIKey #FYI: when publishing to Azure Artifacts the --api-key can be any non-empty string, so we send in 'VSTS' as a placeholder.
+  type: string
+  default:
+
+steps:
+- download: none
+- checkout: self
+
+#deprecated - now using .net core 3.1 pre-installed on self-hosted agent
+#- task: UseDotNet@2
+#  displayName: Use dotnet sdk 3.x
+#  inputs:
+#    version: 3.x
+#    includePreviewVersions: true
+- task: NuGetAuthenticate@0 #always run nuget auth to allow access to private azure artifact feed
+
+- task: DotNetCoreCLI@2
+  displayName: dotnet pack **/${{ parameters.packagesToPack }}
+  inputs:
+    command: pack
+    configuration: $(buildConfiguration)
+    packagesToPack: '**/${{ parameters.packagesToPack }}' # Required when command == pack
+    outputDir: $(Build.ArtifactStagingDirectory)
+    #packDirectory: $(Build.ArtifactStagingDirectory)   #this should be the Pipeline download directory but didn't figure out how to skip the second build yet
+    versioningScheme: byEnvVar      # Options: off, byPrereleaseNumber, byEnvVar, byBuildNumber
+    versionEnvVar: PackageVersion   # Required when versioningScheme == byEnvVar
+    verbosityPack: normal
+    #buildProperties: SymbolPackageFormat=snupkg    #not needed because elements added to csproj
+    includeSymbols: true
+
+#we are using scripting to push the packages because 'skip-duplicate' arguments are not passed in the DotNetCoreCLI task!
+#https://github.com/microsoft/azure-pipelines-tasks/issues/12562
+
+- pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --skip-duplicate -s ${{ parameters.NuGetFeedUrl }} --api-key ${{ parameters.NuGetFeedAPIKey }}
+  displayName: dotnet nuget push

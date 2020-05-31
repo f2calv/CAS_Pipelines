@@ -1,0 +1,44 @@
+parameters:
+- name: packagesToPack
+  type: string
+  default:
+- name: NuGetFeedUrl
+  type: string
+  default:
+- name: NuGetFeedAPIKey
+  type: string
+  default:
+
+jobs:
+- job: PublishJob
+  #pool:
+  #  name: $(poolName)
+  #  vmImage: $(vmImage)
+  variables:
+    Version.Major: 0
+    Version.Minor: 0
+    Version.PackageMajorMinor: $(Version.Minor).$(Version.Major)-$(packagesToPack)
+    Version.Revision: $[counter(variables['Version.PackageMajorMinor'], 0)]
+    PackageVersion: $(Version.Major).$(Version.Minor).$(Version.Revision)
+  steps:
+
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: packagesToPack
+      Value: ${{ parameters.packagesToPack }}
+
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: NuGetFeedUrl
+      Value: ${{ parameters.NuGetFeedUrl }}
+  
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: NuGetFeedAPIKey
+      Value: ${{ parameters.NuGetFeedAPIKey }}
+
+  - template: steps.dotnet.publish.nuget-v2.yml
+    parameters:
+      packagesToPack: ${{ parameters.packagesToPack }}
+      NuGetFeedUrl: ${{ parameters.NuGetFeedUrl }}
+      NuGetFeedAPIKey: ${{ parameters.NuGetFeedAPIKey }}

@@ -1,0 +1,28 @@
+parameters:
+- name: ProjectName
+  type: string
+  default:
+- name: PublishArtifact
+  type: boolean
+  default: true
+
+jobs:
+- job: BuildJob
+  #pool:
+  #  name: $(poolName)
+  #  vmImage: $(vmImage)
+  steps:
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: ProjectName
+      Value: ${{ parameters.ProjectName }}
+
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: PublishArtifact
+      Value: ${{ parameters.PublishArtifact }}
+
+  - template: steps.dotnet.build-v1.yml
+    parameters:
+      ProjectName: ${{ parameters.ProjectName }}
+      PublishArtifact: ${{ parameters.PublishArtifact }}

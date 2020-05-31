@@ -1,0 +1,23 @@
+parameters:
+- name: RepoStartsWith
+  type: string
+  default: ''
+
+steps:
+
+#update common use images on self-hosted build agent
+- ${{ if eq(parameters.RepoStartsWith, '') }}:
+  - pwsh: |
+      docker pull redis:latest
+      docker pull redis:alpine
+      docker pull ubuntu:16.04
+      docker pull ubuntu:18.04
+      docker pull grafana/grafana
+      docker pull prom/prometheus
+    displayName: docker pull images (1 of 2)
+
+#handy to update a bunch of images, i,e. after a Microsoft .NET Core release use 'mcr.' to update all MSFT images.
+- ${{ if ne(parameters.RepoStartsWith, '') }}:
+  - pwsh: |
+      docker images --format '{{.Repository}}' | Where-Object {$_ -ne '<none>' -and $_.StartsWith('${{ parameters.RepoStartsWith }}') } | %{docker pull $_}
+    displayName: docker pull images (2 of 2) (RepoStartsWith='${{ parameters.RepoStartsWith }}')

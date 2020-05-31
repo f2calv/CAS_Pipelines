@@ -1,0 +1,10 @@
+jobs:
+- job: TestJob
+  #pool:
+  #  name: $(poolName)
+  #  vmImage: $(vmImage)
+  steps:
+
+  - template: steps.dotnet.test-v1.yml@sharedTemplates
+    parameters:
+      ProjectName: $(ProjectName)
