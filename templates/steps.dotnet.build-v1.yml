@@ -2,15 +2,23 @@ parameters:
 - name: ProjectName
   type: string
   default:
+- name: SolutionName
+  type: string
+  default:
 - name: PublishArtifact
   type: boolean
   default: true
 
 steps:
-- template: parameter-check-v1.yml
-  parameters:
-    Name: ProjectName
-    Value: ${{ parameters.ProjectName }}
+#- template: parameter-check-v1.yml
+#  parameters:
+#    Name: ProjectName
+#    Value: ${{ parameters.ProjectName }}
+
+#- template: parameter-check-v1.yml
+#  parameters:
+#    Name: SolutionName
+#    Value: ${{ parameters.SolutionName }}
 
 - template: parameter-check-v1.yml
   parameters:
@@ -38,16 +46,29 @@ steps:
 #      **/${{ parameters.ProjectName }}.Tests.csproj
 #    #packagesDirectory: /src/packages
 
-- task: DotNetCoreCLI@2
-  displayName: dotnet build ${{ parameters.ProjectName }}.csproj
-  inputs:
-    command: build
-    #projects: ${{ parameters.ProjectName }}.sln
-    projects: |
-      **/${{ parameters.ProjectName }}.csproj
-      **/${{ parameters.ProjectName }}.Tests.csproj
-    arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
-    #packagesDirectory: /src/packages
+- ${{ if ne(parameters.ProjectName, '') }}:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build ${{ parameters.ProjectName }}.csproj
+    inputs:
+      command: build
+      #projects: ${{ parameters.SolutionName }}.sln
+      projects: |
+        **/${{ parameters.ProjectName }}.csproj
+        **/${{ parameters.ProjectName }}.Tests.csproj
+      arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
+      #packagesDirectory: /src/packages
+
+- ${{ if ne(parameters.SolutionName, '') }}:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build ${{ parameters.SolutionName }}.sln
+    inputs:
+      command: build
+      projects: ${{ parameters.SolutionName }}.sln
+      #projects: |
+      #  **/${{ parameters.ProjectName }}.csproj
+      #  **/${{ parameters.ProjectName }}.Tests.csproj
+      arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
+      #packagesDirectory: /src/packages
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Pipeline Artifact: drop'

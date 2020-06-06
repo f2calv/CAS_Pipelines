@@ -2,6 +2,9 @@ parameters:
 - name: ProjectName
   type: string
   default:
+- name: SolutionName
+  type: string
+  default:
 - name: PublishArtifact
   type: boolean
   default: true
@@ -12,10 +15,15 @@ jobs:
   #  name: $(poolName)
   #  vmImage: $(vmImage)
   steps:
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: ProjectName
-      Value: ${{ parameters.ProjectName }}
+#- template: parameter-check-v1.yml
+#  parameters:
+#    Name: ProjectName
+#    Value: ${{ parameters.ProjectName }}
+
+#- template: parameter-check-v1.yml
+#  parameters:
+#    Name: SolutionName
+#    Value: ${{ parameters.SolutionName }}
 
   - template: parameter-check-v1.yml
     parameters:
@@ -25,4 +33,5 @@ jobs:
   - template: steps.dotnet.build-v1.yml
     parameters:
       ProjectName: ${{ parameters.ProjectName }}
+      SolutionName: ${{ parameters.SolutionName }}
       PublishArtifact: ${{ parameters.PublishArtifact }}
