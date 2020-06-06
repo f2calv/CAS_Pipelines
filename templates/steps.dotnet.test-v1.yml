@@ -1,13 +1,16 @@
 parameters:
-- name: ProjectName
+- name: SolutionName
   type: string
   default: ''
+- name: InstallDependencies
+  type: boolean
+  default: false
 
 steps:
 - template: parameter-check-v1.yml
   parameters:
-    Name: ProjectName
-    Value: ${{ parameters.ProjectName }}
+    Name: SolutionName
+    Value: ${{ parameters.SolutionName }}
 
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Pipeline Artifact: drop'
@@ -30,13 +33,16 @@ steps:
   inputs:
     command: test
     #projects: **/*.Tests/*.csproj
-    projects: ${{ parameters.ProjectName }}.sln
+    projects: ${{ parameters.SolutionName }}.sln
     arguments: --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include="[CasCap.*]*"
     #nobuild: true    #need to figure out PipelineArtifacts
 
 # Generate the report using ReportGenerator (https://github.com/danielpalme/ReportGenerator)
-# First install the tool on the machine, then run it
-# note:  REMOVED STEP 'dotnet tool install -g dotnet-reportgenerator-globaltool' as now on agent
+- ${{ if eq(parameters.InstallDependencies, 'true') }}:
+  - script: |
+      dotnet tool install -g dotnet-reportgenerator-globaltool
+    displayName: install dotnet-reportgenerator-globaltool
+
 - script: |
     reportgenerator -reports:$(Build.SourcesDirectory)/*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
   displayName: Create Code coverage report

@@ -1,10 +1,23 @@
+parameters:
+- name: SolutionName
+  type: string
+  default: ''
+- name: InstallDependencies
+  type: boolean
+  default: false
+
 jobs:
 - job: TestJob
   #pool:
   #  name: $(poolName)
   #  vmImage: $(vmImage)
   steps:
-
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: SolutionName
+      Value: ${{ parameters.SolutionName }}
+  
   - template: steps.dotnet.test-v1.yml@sharedTemplates
     parameters:
-      ProjectName: $(ProjectName)
+      SolutionName: ${{ parameters.SolutionName }}
+      InstallDependencies: ${{ parameters.InstallDependencies }}
