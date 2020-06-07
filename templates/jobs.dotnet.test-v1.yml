@@ -5,6 +5,9 @@ parameters:
 - name: InstallDependencies
   type: boolean
   default: false
+- name: TestFolderPath
+  type: string
+  default: /
 
 jobs:
 - job: TestJob
@@ -21,3 +24,4 @@ jobs:
     parameters:
       SolutionName: ${{ parameters.SolutionName }}
       InstallDependencies: ${{ parameters.InstallDependencies }}
+      TestFolderPath: ${{ parameters.TestFolderPath }}
