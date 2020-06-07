@@ -42,6 +42,10 @@ steps:
   - script: |
       dotnet tool install -g dotnet-reportgenerator-globaltool
     displayName: install dotnet-reportgenerator-globaltool
+  #https://github.com/microsoft/azure-pipelines-tasks/issues/12326
+  #https://github.com/microsoft/azure-pipelines-image-generation/issues/798
+  - script: |
+      echo "##vso[task.prependpath]$HOME/.dotnet/tools"
 
 - script: |
     reportgenerator -reports:$(Build.SourcesDirectory)/*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
