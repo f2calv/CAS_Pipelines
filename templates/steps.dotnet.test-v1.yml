@@ -5,7 +5,7 @@ parameters:
 - name: InstallDependencies
   type: boolean
   default: false
-- name: TestFolderPath
+- name: TestProjectsPath
   type: string
   default: /
 
@@ -51,7 +51,7 @@ steps:
       echo "##vso[task.prependpath]$HOME/.dotnet/tools"
 
 - script: |
-    reportgenerator -reports:$(Build.SourcesDirectory)${{ parameters.TestFolderPath }}*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
+    reportgenerator -reports:$(Build.SourcesDirectory)${{ parameters.TestProjectsPath }}*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
   displayName: Create Code coverage report
 
 # Publish the code coverage result (summary and web site)
