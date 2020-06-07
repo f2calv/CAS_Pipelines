@@ -7,7 +7,7 @@ parameters:
   default: false
 - name: TestProjectsPath
   type: string
-  default: /
+  default: ''
 
 jobs:
 - job: TestJob

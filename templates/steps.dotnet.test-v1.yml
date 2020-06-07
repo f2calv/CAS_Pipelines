@@ -7,7 +7,7 @@ parameters:
   default: false
 - name: TestProjectsPath
   type: string
-  default: /
+  default: ''
 
 steps:
 - template: parameter-check-v1.yml
@@ -40,18 +40,22 @@ steps:
     arguments: --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include="[CasCap.*]*"
     #nobuild: true    #need to figure out PipelineArtifacts
 
+
 # Generate the report using ReportGenerator (https://github.com/danielpalme/ReportGenerator)
 - ${{ if eq(parameters.InstallDependencies, 'true') }}:
   - script: |
       dotnet tool install -g dotnet-reportgenerator-globaltool
     displayName: install dotnet-reportgenerator-globaltool
+  
+  #if we install globally we need to fix the path, if we install just locally can execute via ./reportgenerator
   #https://github.com/microsoft/azure-pipelines-tasks/issues/12326
   #https://github.com/microsoft/azure-pipelines-image-generation/issues/798
   - script: |
       echo "##vso[task.prependpath]$HOME/.dotnet/tools"
+    displayName: fix global tools path
 
 - script: |
-    reportgenerator -reports:$(Build.SourcesDirectory)${{ parameters.TestProjectsPath }}*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
+    reportgenerator -reports:$(Build.SourcesDirectory)/${{ parameters.TestProjectsPath }}*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:Cobertura
   displayName: Create Code coverage report
 
 # Publish the code coverage result (summary and web site)
