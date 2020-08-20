@@ -9,8 +9,6 @@ steps:
     Name: imageRepository
     Value: ${{ parameters.imageRepository }}
 
-- checkout: ${{ parameters.checkout }}
-
 - task: AzureCLI@1
   displayName: az acr helm repo add -n $(AzACRName)
   inputs:
