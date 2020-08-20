@@ -1,15 +1,8 @@
 parameters:
-- name: checkout
-  type: string
-  default: none
 - name: imageRepository
   type: string
 
 steps:
-- template: parameter-check-v1.yml
-  parameters:
-    Name: checkout
-    Value: ${{ parameters.checkout }}
 
 - template: parameter-check-v1.yml
   parameters:
