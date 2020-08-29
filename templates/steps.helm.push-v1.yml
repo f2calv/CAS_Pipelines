@@ -20,7 +20,7 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
-      az acr login --name ${{ parameters.acrName }}
+        az acr login --name ${{ parameters.acrName }}
 # - task: HelmInstaller@1
 #     inputs:
 #     helmVersionToInstall: latest
