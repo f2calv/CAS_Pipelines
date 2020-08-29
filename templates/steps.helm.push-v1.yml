@@ -24,6 +24,6 @@ steps:
 # - task: HelmInstaller@1
 #     inputs:
 #     helmVersionToInstall: latest
- - bash: |
-     helm chart save ./${{ parameters.imageRepositoryFolder }}/charts/${{ parameters.repository }} ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
-     helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+- bash: |
+    helm chart save ./${{ parameters.imageRepositoryFolder }}/charts/${{ parameters.repository }} ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
