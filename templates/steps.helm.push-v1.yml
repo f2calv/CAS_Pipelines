@@ -1,0 +1,32 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: acrName
+  type: string
+  default: $(acrName)
+- name: repository
+  type: string
+  default: $(repository)
+- name: imageRepositoryFolder
+  type: string
+  default: $(imageRepositoryFolder)
+
+steps:
+- task: AzureCLI@2
+    displayName: Login to Azure Container Registry
+    inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+        az acr login --name ${{ parameters.acrName }}
+# - task: HelmInstaller@1
+#     inputs:
+#     helmVersionToInstall: latest
+- bash: |
+    helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:$(Build.BuildId)
+    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:$(Build.BuildId)
+    
+    helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
