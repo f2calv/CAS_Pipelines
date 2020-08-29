@@ -11,10 +11,11 @@ steps:
 
 - checkout: ${{ parameters.checkout }}
 
-- task: AzureCLI@1
+- task: AzureCLI@2
   displayName: az acr helm repo add -n $(AzACRName)
   inputs:
     azureSubscription: $(azureSubscription)
+    scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr helm repo add -n $(AzACRName) --verbose
     #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))

@@ -28,10 +28,11 @@ steps:
     destination: $(Build.ArtifactStagingDirectory)
     save: false
 
-- task: AzureCLI@1
+- task: AzureCLI@2
   displayName: az acr helm push
   inputs:
     azureSubscription: $(azureSubscription)
+    scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(imageRepository)-$(Build.BuildId).tgz
     #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
