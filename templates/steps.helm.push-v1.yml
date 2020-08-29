@@ -17,16 +17,15 @@ steps:
   displayName: Login to Azure Container Registry
   inputs:
       azureSubscription: ${{ parameters.azureSubscription }}
-      scriptType: bash
+      scriptType: pwsh
       scriptLocation: inlineScript
       inlineScript: |
         az acr login --name ${{ parameters.acrName }}
+        helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+        helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
 # - task: HelmInstaller@1
 #     inputs:
 #     helmVersionToInstall: latest
-- bash: |
-    helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:$(Build.BuildId)
-    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:$(Build.BuildId)
-    
-    helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
-    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+# - bash: |
+#     helm chart save ./$(imageRepositoryFolder)/charts/$(imageRepository) ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+#     helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
