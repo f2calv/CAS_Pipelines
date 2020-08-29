@@ -11,6 +11,10 @@ parameters:
 - name: imageRepositoryFolder
   type: string
   default: $(imageRepositoryFolder)
+- name: spId
+  type: string
+- name: spPassword
+  type: string
 
 steps:
 - task: AzureCLI@2
@@ -26,4 +30,5 @@ steps:
 #     helmVersionToInstall: latest
 - bash: |
     helm chart save ./${{ parameters.imageRepositoryFolder }}/charts/${{ parameters.repository }} ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
+    helm registry login ${{ parameters.acrName }}.azurecr.io --username ${{ parameters.spId }} --password ${{ parameters.spPassword }}
     helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:latest
