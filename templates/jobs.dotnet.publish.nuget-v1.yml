@@ -11,13 +11,10 @@ parameters:
 
 jobs:
 - job: PublishJob
-  #pool:
-  #  name: $(poolName)
-  #  vmImage: $(vmImage)
   variables:
     Version.Major: 0
     Version.Minor: 0
-    Version.PackageMajorMinor: $(Version.Minor).$(Version.Major)-$(packagesToPack)
+    Version.PackageMajorMinor: $(Version.Minor).$(Version.Major)-${{ parameters.packagesToPack }}
     Version.Revision: $[counter(variables['Version.PackageMajorMinor'], 0)]
     PackageVersion: $(Version.Major).$(Version.Minor).$(Version.Revision)
   steps:
