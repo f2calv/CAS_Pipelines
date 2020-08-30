@@ -20,9 +20,12 @@ parameters:
 - name: Dockerfile
   type: string
   default: Dockerfile
-- name: Tag
+- name: tag
   type: string
   default: $(Build.BuildNumber)
+- name: acrName
+  type: string
+  default: $(acrName)
 
 steps:
 - template: parameter-check-v1.yml
@@ -72,12 +75,12 @@ steps:
   displayName: Login to ACR
   inputs:
     command: login
-    containerRegistry: $(AzACRName)
+    containerRegistry: ${{ parameters.acrName }}
 
 - task: Docker@1
-  displayName: 'Build image ${{ parameters.repository }}:${{ parameters.Tag }}'
+  displayName: 'Build image ${{ parameters.repository }}:${{ parameters.tag }}'
   inputs:
-    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
+    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }}'
     command: build
     dockerFile: ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }}
     useDefaultContext: false
@@ -86,15 +89,15 @@ steps:
 
 - pwsh: |
     docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
-  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
+  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
 
 - ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
   - task: Docker@1
-    displayName: 'Push image (1 of 2) $(repository):${{ parameters.Tag }}'
+    displayName: 'Push image (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
     inputs:
       azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
-      imageName: '${{ parameters.repository }}:${{ parameters.Tag }}'
+      imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
       command: push
 
 - ${{ if eq(parameters.PushTagLatest, 'true') }}:

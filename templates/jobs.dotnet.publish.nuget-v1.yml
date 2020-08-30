@@ -31,9 +31,6 @@ jobs:
       publishFeedCredentials: ${{ parameters.publishFeedCredentials }}
 
 #- deployment: PublishJob
-#  pool:
-#    name: $(poolName)
-#    #vmImage: $(vmImage)
 #  timeoutInMinutes: 5
 #  environment: NuGet
 #  strategy:

@@ -2,9 +2,9 @@ parameters:
 - name: azureSubscription
   type: string
   default: $(azureSubscription)
-- name: acrName
+- name: registry
   type: string
-  default: $(acrName)
+  default: $(acrName).azurecr.io
 - name: repository
   type: string
   default: $(repository)
@@ -14,6 +14,9 @@ parameters:
 - name: tag
   type: string
   default: latest
+- name: acrName
+  type: string
+  default: $(acrName)
 - name: spId
   type: string
 - name: spPassword
@@ -32,7 +35,7 @@ steps:
 #     inputs:
 #     helmVersionToInstall: latest
 - bash: |
-    helm registry login ${{ parameters.acrName }}.azurecr.io --username ${{ parameters.spId }} --password ${{ parameters.spPassword }}
+    helm registry login ${{ parameters.registry }} --username ${{ parameters.spId }} --password ${{ parameters.spPassword }}
 
-    helm chart save ./${{ parameters.repositoryFolder }}/charts/${{ parameters.repository }} ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:${{ parameters.tag }}
-    helm chart push ${{ parameters.acrName }}.azurecr.io/charts/${{ parameters.repository }}:${{ parameters.tag }}
+    helm chart save ./${{ parameters.repositoryFolder }}/charts/${{ parameters.repository }} ${{ parameters.registry }}/charts/${{ parameters.repository }}:${{ parameters.tag }}
+    helm chart push ${{ parameters.registry }}/charts/${{ parameters.repository }}:${{ parameters.tag }}

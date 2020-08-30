@@ -30,13 +30,13 @@ steps:
     Value: ${{ parameters.repository }}
 
 - task: AzureCLI@2
-  displayName: az acr helm repo add -n $(AzACRName)
+  displayName: az acr helm repo add -n ${{ parameters.acrName }}
   #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr helm repo add -n $(AzACRName) --verbose
+    inlineScript: az acr helm repo add -n ${{ parameters.acrName }} --verbose
 
 #FYI - if the first helm install (using below update+install arg) fails, you need to run 'purge', which "Remove the release from the store and make its name free for later use"
 #https://github.com/helm/helm/blob/master/docs/helm/helm_delete.md
@@ -44,18 +44,18 @@ steps:
 
 #https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops#upgrade-command
 - task: HelmDeploy@0
-  displayName: helm upgrade $(AzACRName)/${{ parameters.repository }} --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)
+  displayName: helm upgrade ${{ parameters.acrName }}/${{ parameters.repository }} --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
     azureResourceGroup: ${{ parameters.azureResourceGroup }}
     kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: upgrade
     #chartType: Name
-    chartName: $(AzACRName)/${{ parameters.repository }}
+    chartName: ${{ parameters.acrName }}/${{ parameters.repository }}
     releaseName: ${{ parameters.repository }}
     #overrideValues: image.tag=$(Build.BuildNumber)
     #resetValues: true
     #force: true
-    #--version $(Build.BuildId) --set image.repository=$(registryName).azurecr.io/${{ parameters.repository }} --set image.tag=$(Build.BuildId) --set ingress.enabled=false
+    #--version $(Build.BuildId) --set image.repository=${{ parameters.registry }}/${{ parameters.repository }} --set image.tag=$(Build.BuildId) --set ingress.enabled=false
     #arguments: --install --force
     arguments: --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)

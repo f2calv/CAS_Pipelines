@@ -2,6 +2,21 @@ parameters:
 - name: azureSubscription
   type: string
   default: $(azureSubscription)
+- name: registry
+  type: string
+  default: $(acrName).azurecr.io
+- name: repository
+  type: string
+  default: $(repository)
+- name: repositoryFolder
+  type: string
+  default: $(repositoryFolder)
+- name: tag
+  type: string
+  default: $(Build.BuildId)
+- name: acrName
+  type: string
+  default: $(acrName)
 - name: azureResourceGroup
   type: string
   default: $(azureResourceGroup)
@@ -34,8 +49,8 @@ steps:
     azureResourceGroup: ${{ parameters.azureResourceGroup }}
     kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: package
-    chartPath: $(repositoryFolder)/charts/$(repository)
-    chartVersion: $(Build.BuildId)
+    chartPath: ${{ parameters.repositoryFolder }}/charts/${{ parameters.repository }}
+    chartVersion: ${{ parameters.tag }}
     destination: $(Build.ArtifactStagingDirectory)
     save: false
 
@@ -46,4 +61,4 @@ steps:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(repository)-$(Build.BuildId).tgz
+    inlineScript: az acr helm push -n ${{ parameters.acrName }} $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}-${{ parameters.tag }}.tgz
