@@ -62,13 +62,13 @@ steps:
 #    releaseType: stable
 
 #- task: Docker@2
-#  displayName: 'Build and Push image ${{ parameters.repository }}:$(Build.BuildNumber)'
+#  displayName: 'Build and Push image ${{ parameters.repository }}:${{ parameters.tag }}'
 #  inputs:
 #    containerRegistry: ${{ parameters.azureContainerRegistry}}
 #    repository: ${{ parameters.repository }}
 #    command: buildAndPush
 #    Dockerfile: ${{ parameters.repositoryFolder}}/${{ parameters.Dockerfile }}
-#    tags: $(Build.BuildNumber)
+#    tags: ${{ parameters.tag }}
 
 #Note: login to ACR is needed when building from base images held within ACR
 - task: Docker@2
