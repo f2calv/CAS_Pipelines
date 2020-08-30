@@ -2,6 +2,12 @@ parameters:
 - name: azureSubscription
   type: string
   default: $(azureSubscription)
+- name: azureResourceGroup
+  type: string
+  default: $(azureResourceGroup)
+- name: kubernetesCluster
+  type: string
+  default: $(kubernetesCluster)
 - name: checkout
   type: string
   default: none
@@ -25,12 +31,12 @@ steps:
 
 - task: AzureCLI@2
   displayName: az acr helm repo add -n $(AzACRName)
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr helm repo add -n $(AzACRName) --verbose
-    #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
 #FYI - if the first helm install (using below update+install arg) fails, you need to run 'purge', which "Remove the release from the store and make its name free for later use"
 #https://github.com/helm/helm/blob/master/docs/helm/helm_delete.md
@@ -41,8 +47,8 @@ steps:
   displayName: helm upgrade $(AzACRName)/${{ parameters.repository }} --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
-    azureResourceGroup: $(azureResourceGroup)
-    kubernetesCluster: $(kubernetesCluster)
+    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+    kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: upgrade
     #chartType: Name
     chartName: $(AzACRName)/${{ parameters.repository }}
@@ -50,6 +56,6 @@ steps:
     #overrideValues: image.tag=$(Build.BuildNumber)
     #resetValues: true
     #force: true
-    #--version $(Build.BuildId) --set image.repository=$(registryName).azurecr.io/${{ parameters.repository }} --set image.tag=$(build.buildId) --set ingress.enabled=false
+    #--version $(Build.BuildId) --set image.repository=$(registryName).azurecr.io/${{ parameters.repository }} --set image.tag=$(Build.BuildId) --set ingress.enabled=false
     #arguments: --install --force
     arguments: --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)

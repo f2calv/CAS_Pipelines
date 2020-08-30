@@ -2,6 +2,12 @@ parameters:
 - name: azureSubscription
   type: string
   default: $(azureSubscription)
+- name: azureResourceGroup
+  type: string
+  default: $(azureResourceGroup)
+- name: kubernetesCluster
+  type: string
+  default: $(kubernetesCluster)
 
 steps:
 #https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops
@@ -17,16 +23,16 @@ steps:
 #  displayName: helm version
 #  inputs:
 #    azureSubscription: ${{ parameters.azureSubscription }}
-#    azureResourceGroup: $(azureResourceGroup)
-#    kubernetesCluster: $(kubernetesCluster)
+#    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+#    kubernetesCluster: ${{ parameters.kubernetesCluster }}
 #    command: version
 
 - task: HelmDeploy@0
   displayName: helm package
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
-    azureResourceGroup: $(azureResourceGroup)
-    kubernetesCluster: $(kubernetesCluster)
+    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+    kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: package
     chartPath: $(repositoryFolder)/charts/$(repository)
     chartVersion: $(Build.BuildId)
