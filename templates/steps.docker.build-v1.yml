@@ -1,11 +1,28 @@
 parameters:
-  imageRepositoryFolder:
-  imageRepository:
-  azureContainerRegistry:
-  PushTagBuildNumber:
-  PushTagLatest:
-  Dockerfile: Dockerfile
-  Tag: $(Build.BuildNumber)
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: imageRepositoryFolder
+  type: string
+  default: $(imageRepositoryFolder)
+- name: imageRepository
+  type: string
+  default: $(imageRepository)
+- name: azureContainerRegistry
+  type: string
+  default: $(azureContainerRegistry)
+- name: PushTagBuildNumber
+  type: boolean
+  default: $(PushTagBuildNumber)
+- name: PushTagLatest
+  type: boolean
+  default: $(PushTagLatest)
+- name: Dockerfile
+  type: string
+  default: Dockerfile
+- name: Tag
+  type: string
+  default: $(Build.BuildNumber)
 
 steps:
 - template: parameter-check-v1.yml
@@ -75,7 +92,7 @@ steps:
   - task: Docker@1
     displayName: 'Push image (1 of 2) $(imageRepository):${{ parameters.Tag }}'
     inputs:
-      azureSubscriptionEndpoint: $(azureSubscription)
+      azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
       imageName: '${{ parameters.imageRepository }}:${{ parameters.Tag }}'
       command: push
@@ -84,7 +101,7 @@ steps:
   - task: Docker@1
     displayName: 'Push image (2 of 2) ${{ parameters.imageRepository }}:latest'
     inputs:
-      azureSubscriptionEndpoint: $(azureSubscription)
+      azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
       imageName: '${{ parameters.imageRepository }}:latest'
       command: push
