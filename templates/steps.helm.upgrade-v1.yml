@@ -1,42 +1,61 @@
 parameters:
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: azureResourceGroup
+  type: string
+  default: $(azureResourceGroup)
+- name: kubernetesCluster
+  type: string
+  default: $(kubernetesCluster)
 - name: checkout
   type: string
   default: none
+- name: repository
+  type: string
+  default: $(repository)
 
 steps:
+- ${{ if ne(parameters.checkout, 'none') }}:
+  - template: parameter-check-v1.yml
+    parameters:
+      Name: checkout
+      Value: ${{ parameters.checkout }}
+
+  - checkout: ${{ parameters.checkout }}
+
 - template: parameter-check-v1.yml
   parameters:
-    Name: checkout
-    Value: ${{ parameters.checkout }}
+    Name: repository
+    Value: ${{ parameters.repository }}
 
-- checkout: ${{ parameters.checkout }}
-
-- task: AzureCLI@1
-  displayName: az acr helm repo add -n $(AzACRName)
+- task: AzureCLI@2
+  displayName: az acr helm repo add -n ${{ parameters.acrName }}
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   inputs:
-    azureSubscription: $(azureSubscription)
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr helm repo add -n $(AzACRName) --verbose
-    #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    inlineScript: az acr helm repo add -n ${{ parameters.acrName }} --verbose
 
 #FYI - if the first helm install (using below update+install arg) fails, you need to run 'purge', which "Remove the release from the store and make its name free for later use"
 #https://github.com/helm/helm/blob/master/docs/helm/helm_delete.md
-#helm delete --purge $(imageRepository)
+#helm delete --purge ${{ parameters.repository }}
 
 #https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops#upgrade-command
 - task: HelmDeploy@0
-  displayName: helm upgrade $(AzACRName)/$(imageRepository) --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)
+  displayName: helm upgrade ${{ parameters.acrName }}/${{ parameters.repository }} --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)
   inputs:
-    azureSubscription: $(azureSubscription)
-    azureResourceGroup: $(azureResourceGroup)
-    kubernetesCluster: $(kubernetesCluster)
+    azureSubscription: ${{ parameters.azureSubscription }}
+    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+    kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: upgrade
     #chartType: Name
-    chartName: $(AzACRName)/$(imageRepository)
-    releaseName: $(imageRepository)
+    chartName: ${{ parameters.acrName }}/${{ parameters.repository }}
+    releaseName: ${{ parameters.repository }}
     #overrideValues: image.tag=$(Build.BuildNumber)
     #resetValues: true
     #force: true
-    #--version $(Build.BuildId) --set image.repository=$(registryName).azurecr.io/$(projectName) --set image.tag=$(build.buildId) --set ingress.enabled=false
+    #--version $(Build.BuildId) --set image.repository=${{ parameters.registry }}/${{ parameters.repository }} --set image.tag=$(Build.BuildId) --set ingress.enabled=false
     #arguments: --install --force
     arguments: --install --version $(Build.BuildId) --set image.tag=$(Build.BuildNumber)

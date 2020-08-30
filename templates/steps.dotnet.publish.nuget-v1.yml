@@ -45,9 +45,6 @@ steps:
 #      nuGetFeedType: internal
 #      feedPublish: ${{ parameters.publishVstsFeed }}
 #      arguments: --skip-duplicate
-#script: 
-#- pwsh:
-#dotnet nuget push $(PATH_PIPELINE_ARTIFACT_NAME)/**/*.nupkg --source $(NUGET_FEED) --api-key $(NUGET_API_KEY) --skip-duplicate
 - ${{ if ne(parameters.publishVstsFeed, '') }}:
   - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --source ${{ parameters.publishVstsFeed }} --api-key VSTS --skip-duplicate
 

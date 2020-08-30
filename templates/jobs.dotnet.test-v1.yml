@@ -11,9 +11,6 @@ parameters:
 
 jobs:
 - job: TestJob
-  #pool:
-  #  name: $(poolName)
-  #  vmImage: $(vmImage)
   steps:
   - template: parameter-check-v1.yml
     parameters:

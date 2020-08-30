@@ -1,3 +1,29 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: registry
+  type: string
+  default: $(acrName).azurecr.io
+- name: repository
+  type: string
+  default: $(repository)
+- name: repositoryFolder
+  type: string
+  default: $(repositoryFolder)
+- name: tag
+  type: string
+  default: $(Build.BuildId)
+- name: acrName
+  type: string
+  default: $(acrName)
+- name: azureResourceGroup
+  type: string
+  default: $(azureResourceGroup)
+- name: kubernetesCluster
+  type: string
+  default: $(kubernetesCluster)
+
 steps:
 #https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops
 
@@ -11,27 +37,28 @@ steps:
 #- task: HelmDeploy@0
 #  displayName: helm version
 #  inputs:
-#    azureSubscription: $(azureSubscription)
-#    azureResourceGroup: $(azureResourceGroup)
-#    kubernetesCluster: $(kubernetesCluster)
+#    azureSubscription: ${{ parameters.azureSubscription }}
+#    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+#    kubernetesCluster: ${{ parameters.kubernetesCluster }}
 #    command: version
 
 - task: HelmDeploy@0
   displayName: helm package
   inputs:
-    azureSubscription: $(azureSubscription)
-    azureResourceGroup: $(azureResourceGroup)
-    kubernetesCluster: $(kubernetesCluster)
+    azureSubscription: ${{ parameters.azureSubscription }}
+    azureResourceGroup: ${{ parameters.azureResourceGroup }}
+    kubernetesCluster: ${{ parameters.kubernetesCluster }}
     command: package
-    chartPath: $(imageRepositoryFolder)/charts/$(imageRepository)
-    chartVersion: $(Build.BuildId)
+    chartPath: ${{ parameters.repositoryFolder }}/charts/${{ parameters.repository }}
+    chartVersion: ${{ parameters.tag }}
     destination: $(Build.ArtifactStagingDirectory)
     save: false
 
-- task: AzureCLI@1
+- task: AzureCLI@2
   displayName: az acr helm push
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   inputs:
-    azureSubscription: $(azureSubscription)
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(imageRepository)-$(Build.BuildId).tgz
-    #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    inlineScript: az acr helm push -n ${{ parameters.acrName }} $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}-${{ parameters.tag }}.tgz
