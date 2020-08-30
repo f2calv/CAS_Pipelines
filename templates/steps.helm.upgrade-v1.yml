@@ -18,6 +18,11 @@ steps:
 
   - checkout: ${{ parameters.checkout }}
 
+- template: parameter-check-v1.yml
+  parameters:
+    Name: imageRepository
+    Value: ${{ parameters.imageRepository }}
+
 - task: AzureCLI@2
   displayName: az acr helm repo add -n $(AzACRName)
   inputs:
