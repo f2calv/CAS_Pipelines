@@ -2,12 +2,12 @@ parameters:
 - name: azureSubscription
   type: string
   default: $(azureSubscription)
-- name: imageRepositoryFolder
+- name: repositoryFolder
   type: string
-  default: $(imageRepositoryFolder)
-- name: imageRepository
+  default: $(repositoryFolder)
+- name: repository
   type: string
-  default: $(imageRepository)
+  default: $(repository)
 - name: azureContainerRegistry
   type: string
   default: $(azureContainerRegistry)
@@ -27,13 +27,13 @@ parameters:
 steps:
 - template: parameter-check-v1.yml
   parameters:
-    Name: imageRepositoryFolder
-    Value: ${{ parameters.imageRepositoryFolder }}
+    Name: repositoryFolder
+    Value: ${{ parameters.repositoryFolder }}
 
 - template: parameter-check-v1.yml
   parameters:
-    Name: imageRepository
-    Value: ${{ parameters.imageRepository }}
+    Name: repository
+    Value: ${{ parameters.repository }}
 
 - template: parameter-check-v1.yml
   parameters:
@@ -59,12 +59,12 @@ steps:
 #    releaseType: stable
 
 #- task: Docker@2
-#  displayName: 'Build and Push image ${{ parameters.imageRepository }}:$(Build.BuildNumber)'
+#  displayName: 'Build and Push image ${{ parameters.repository }}:$(Build.BuildNumber)'
 #  inputs:
 #    containerRegistry: ${{ parameters.azureContainerRegistry}}
-#    repository: ${{ parameters.imageRepository }}
+#    repository: ${{ parameters.repository }}
 #    command: buildAndPush
-#    Dockerfile: ${{ parameters.imageRepositoryFolder}}/${{ parameters.Dockerfile }}
+#    Dockerfile: ${{ parameters.repositoryFolder}}/${{ parameters.Dockerfile }}
 #    tags: $(Build.BuildNumber)
 
 #Note: login to ACR is needed when building from base images held within ACR
@@ -75,33 +75,33 @@ steps:
     containerRegistry: $(AzACRName)
 
 - task: Docker@1
-  displayName: 'Build image ${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+  displayName: 'Build image ${{ parameters.repository }}:${{ parameters.Tag }}'
   inputs:
-    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
     command: build
-    dockerFile: ${{ parameters.imageRepositoryFolder }}/${{ parameters.Dockerfile }}
+    dockerFile: ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }}
     useDefaultContext: false
     addDefaultLabels: false #false enables image caching when building on a self-hosted agent
     arguments: --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
 
 - pwsh: |
-    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:latest
-  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:${{ parameters.Tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.imageRepository }}:latest'
+    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
 
 - ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
   - task: Docker@1
-    displayName: 'Push image (1 of 2) $(imageRepository):${{ parameters.Tag }}'
+    displayName: 'Push image (1 of 2) $(repository):${{ parameters.Tag }}'
     inputs:
       azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
-      imageName: '${{ parameters.imageRepository }}:${{ parameters.Tag }}'
+      imageName: '${{ parameters.repository }}:${{ parameters.Tag }}'
       command: push
 
 - ${{ if eq(parameters.PushTagLatest, 'true') }}:
   - task: Docker@1
-    displayName: 'Push image (2 of 2) ${{ parameters.imageRepository }}:latest'
+    displayName: 'Push image (2 of 2) ${{ parameters.repository }}:latest'
     inputs:
       azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
-      imageName: '${{ parameters.imageRepository }}:latest'
+      imageName: '${{ parameters.repository }}:latest'
       command: push

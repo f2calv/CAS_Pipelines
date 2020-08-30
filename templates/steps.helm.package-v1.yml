@@ -28,7 +28,7 @@ steps:
     azureResourceGroup: $(azureResourceGroup)
     kubernetesCluster: $(kubernetesCluster)
     command: package
-    chartPath: $(imageRepositoryFolder)/charts/$(imageRepository)
+    chartPath: $(repositoryFolder)/charts/$(repository)
     chartVersion: $(Build.BuildId)
     destination: $(Build.ArtifactStagingDirectory)
     save: false
@@ -40,4 +40,4 @@ steps:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(imageRepository)-$(Build.BuildId).tgz
+    inlineScript: az acr helm push -n $(AzACRName) $(Build.ArtifactStagingDirectory)/$(repository)-$(Build.BuildId).tgz
