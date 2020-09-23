@@ -21,12 +21,10 @@ steps:
     artifact: drop
     path: $(Build.ArtifactStagingDirectory)
 
-#deprecated - now using .net core 3.1 pre-installed on self-hosted agent
-#- task: UseDotNet@2
-#  displayName: Use dotnet sdk 3.x
-#  inputs:
-#    version: 3.x
-#    includePreviewVersions: true
+- task: UseDotNet@2
+  displayName: Use dotnet sdk 3.1.x
+  inputs:
+    version: 3.1.x
 
 - task: NuGetAuthenticate@0 #always run nuget auth to allow access to private azure artifact feed
 
