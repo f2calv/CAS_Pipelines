@@ -11,6 +11,9 @@ parameters:
 - name: ProdBranch
   type: string
   default: refs/heads/master #default is set for GitHubFlow branching strategy
+- name: CoverageInclude
+  type: string
+  default: '*'
 - name: githubConnection
   type: string
   default: ''
@@ -65,7 +68,7 @@ steps:
 - pwsh: dotnet build --nologo -c ${{ parameters.BuildConfiguration }} --verbosity minimal -p:Version='$(GitVersion.NuGetVersion)'
   displayName: dotnet build
 
-- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
