@@ -19,6 +19,17 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
+- bash: |
+    $HOME/.dotnet/tools
+    ls -lsa
+
+- bash: |
+    dotnet tool update -g GitVersion.Tool
+
+- bash: |
+    $HOME/.dotnet/tools
+    ls -lsa
+
 - script: |
     cd $(Agent.ToolsDirectory)/gitversion/
     ls -lsa
