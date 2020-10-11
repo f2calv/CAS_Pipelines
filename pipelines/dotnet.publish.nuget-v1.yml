@@ -76,15 +76,15 @@ steps:
   
 - bash: |
     dotnet tool update -g dotnet-reportgenerator-globaltool
-    $HOME/.dotnet/tools/reportgenerator -reports:src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+    $HOME/.dotnet/tools/reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: reportgenerator (Linux)
 
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: Cobertura
-    summaryFileLocation: CodeCoverage/Cobertura.xml
-    reportDirectory: CodeCoverage/
+    summaryFileLocation: $(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml
+    reportDirectory: $(Build.SourcesDirectory)/CodeCoverage/
 
 - pwsh: dotnet pack --nologo -c ${{ parameters.BuildConfiguration }} --no-build --include-symbols -o $(Build.ArtifactStagingDirectory) -p:Version='$(GitVersion.NuGetVersion)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
