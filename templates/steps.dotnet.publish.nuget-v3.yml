@@ -32,6 +32,8 @@ steps:
   displayName: AddTag
 
 - pwsh: |
+    cd ~/.dotnet/tools/
+    ls -lsa
     git tag $(GitVersion.NuGetVersion)
     git push origin --tags
   displayName: git tag
