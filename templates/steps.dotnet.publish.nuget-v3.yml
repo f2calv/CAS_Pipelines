@@ -22,18 +22,9 @@ steps:
 - bash: |
     cd $HOME/.dotnet/tools
     ls -lsa
-
-- bash: |
     dotnet tool update -g GitVersion.Tool
-
-- bash: |
-    cd $HOME/.dotnet/tools
+    cd $HOME/.dotnet/tools/dotnet-gitversion
     ls -lsa
-
-- script: |
-    cd $(Agent.ToolsDirectory)/gitversion/
-    ls -lsa
-
 
 - script: |
     $(Agent.ToolsDirectory)/gitversion/5.1.3/dotnet-gitversion $(Build.SourcesDirectory) /output buildserver /nofetch
