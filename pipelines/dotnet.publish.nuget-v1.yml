@@ -70,7 +70,7 @@ steps:
 
 - pwsh: |
     dotnet tool install -g dotnet-reportgenerator-globaltool
-    reportgenerator -reports:src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+    reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Windows_NT')
   displayName: reportgenerator (Windows)
   
