@@ -1,0 +1,89 @@
+parameters:
+- name: BuildConfiguration
+  type: string
+  default: release
+- name: NuGetServerFeedUrl
+  type: string
+  default: $(NuGetServerFeedUrl)
+- name: NuGetServerApiKey
+  type: string
+  default: $(NuGetServerApiKey)
+- name: ProdBranch
+  type: string
+  default: refs/heads/master #default is set for GitHubFlow branching strategy
+- name: githubConnection
+  type: string
+  default: ''
+
+steps:
+- checkout: self
+  persistCredentials: true #persist credentials because we need to push a git tag back into the repo
+
+#- pwsh: dotnet tool update -g GitVersion.Tool
+
+- pwsh: gitversion /output buildserver /nofetch
+  displayName: gitversion
+
+- pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
+  displayName: UpdateBuildNumber
+
+- pwsh: Write-Host "##vso[Build.AddBuildTag]$(GitVersion.NuGetVersion)"
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
+  displayName: AddTag
+
+- pwsh: |
+    git tag $(GitVersion.NuGetVersion)
+    git push origin --tags
+  displayName: git tag
+
+- task: UseDotNet@2
+  displayName: .NET Core 3.1.x SDK
+  inputs:
+    version: 3.1.x
+
+- task: UseDotNet@2
+  displayName: .NET 5.x SDK
+  inputs:
+    version: 5.x
+    includePreviewVersions: true
+
+# - pwsh: dotnet --list-sdks
+#   displayName: dotnet --list-sdks
+
+#note: the dotnet restore step is actually unnecessary as dotnet build does a restore by default, but retained for clarity
+#todo: use Cache@2 task for faster restore, but requires packages.lock.json file so skip for now...
+- pwsh: dotnet restore
+  displayName: dotnet restore
+
+- pwsh: dotnet build --nologo -c ${{ parameters.BuildConfiguration }} --verbosity minimal -p:Version='$(GitVersion.NuGetVersion)'
+  displayName: dotnet build
+
+- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+  displayName: dotnet test
+
+- pwsh: |
+    dotnet tool install -g dotnet-reportgenerator-globaltool
+    reportgenerator -reports:src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+  displayName: reportgenerator
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: CodeCoverage/Cobertura.xml
+    reportDirectory: CodeCoverage/
+
+- pwsh: dotnet pack --nologo -c ${{ parameters.BuildConfiguration }} --no-build --include-symbols -o $(Build.ArtifactStagingDirectory) -p:Version='$(GitVersion.NuGetVersion)'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  displayName: dotnet pack
+
+- pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --skip-duplicate -s $(NuGetServerFeedUrl) --api-key $(NuGetServerApiKey)
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), and(ne(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), ne(variables['Build.Reason'], 'PullRequest'))))
+  displayName: dotnet nuget push
+
+- task: GithubRelease@0
+  enabled: ne(parameters.githubConnection, '')
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
+  inputs:
+    githubConnection: ${{ parameters.githubConnection }}
+    action: create
+    tag: $(GitVersion.NuGetVersion)
