@@ -19,10 +19,6 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
-# - pwsh: gitversion /output buildserver /nofetch
-#   condition: eq(variables['Agent.OS'], 'Windows_NT')
-#   displayName: GitVersion (Windows)
-
 - pwsh: |
     #dotnet tool update -g GitVersion.Tool
     GitVersion $(Build.SourcesDirectory) /output buildserver /nofetch
@@ -70,6 +66,8 @@ steps:
   displayName: dotnet build
 
 - pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+#- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+#- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
 
 - pwsh: |
@@ -82,7 +80,7 @@ steps:
     dotnet tool update -g dotnet-reportgenerator-globaltool
     cd $HOME/.dotnet/tools
     ls -lsa
-    $HOME/.dotnet/tools/reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+    $HOME/.dotnet/tools/reportgenerator '-reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml' -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: reportgenerator (Linux)
 
