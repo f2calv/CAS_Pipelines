@@ -21,8 +21,8 @@ steps:
 
 #- pwsh: dotnet tool update -g GitVersion.Tool
 
-- pwsh: gitversion /output buildserver /nofetch
-  displayName: gitversion
+- pwsh: GitVersion /output buildserver /nofetch
+  displayName: GitVersion
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
   displayName: UpdateBuildNumber
