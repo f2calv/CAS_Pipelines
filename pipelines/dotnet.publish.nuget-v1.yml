@@ -78,7 +78,7 @@ steps:
     dotnet tool update -g dotnet-reportgenerator-globaltool
     cd $HOME/.dotnet/tools
     ls -lsa
-    $HOME/.dotnet/tools/reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+    $HOME/.dotnet/tools/reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: reportgenerator (Linux)
 
