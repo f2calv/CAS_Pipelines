@@ -23,13 +23,13 @@ steps:
     dotnet tool update -g GitVersion.Tool
     GitVersion /output buildserver /nofetch
   condition: eq(variables['Agent.OS'], 'Windows_NT')
-  displayName: GitVersion
+  displayName: GitVersion (Windows)
 
 - bash: |
     dotnet tool update -g GitVersion.Tool
     $HOME/.dotnet/tools/dotnet-gitversion $(Build.SourcesDirectory) /output buildserver /nofetch
   condition: eq(variables['Agent.OS'], 'Linux')
-  displayName: GitVersion
+  displayName: GitVersion (Linux)
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
   displayName: UpdateBuildNumber
@@ -71,7 +71,14 @@ steps:
 - pwsh: |
     dotnet tool install -g dotnet-reportgenerator-globaltool
     reportgenerator -reports:src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
-  displayName: reportgenerator
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+  displayName: reportgenerator (Windows)
+  
+- bash: |
+    dotnet tool update -g dotnet-reportgenerator-globaltool
+    $HOME/.dotnet/tools/reportgenerator -reports:src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+  condition: eq(variables['Agent.OS'], 'Linux')
+  displayName: reportgenerator (Linux)
 
 - task: PublishCodeCoverageResults@1
   inputs:
