@@ -22,13 +22,13 @@ steps:
 - pwsh: |
     dotnet tool update -g GitVersion.Tool
     GitVersion /output buildserver /nofetch
-  enabled: eq(variables['Agent.OS'], 'Windows_NT')
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
   displayName: GitVersion
 
 - bash: |
     dotnet tool update -g GitVersion.Tool
     $HOME/.dotnet/tools/GitVersion /output buildserver /nofetch
-  enabled: eq(variables['Agent.OS'], 'Linux')
+  condition: eq(variables['Agent.OS'], 'Linux')
   displayName: GitVersion
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
