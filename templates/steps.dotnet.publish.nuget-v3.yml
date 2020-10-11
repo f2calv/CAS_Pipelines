@@ -27,7 +27,7 @@ steps:
 
 - bash: |
     dotnet tool update -g GitVersion.Tool
-    $HOME/.dotnet/tools/dotnet-gitversion /output buildserver /nofetch
+    $HOME/.dotnet/tools/gitversion /output buildserver /nofetch
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: GitVersion
 
