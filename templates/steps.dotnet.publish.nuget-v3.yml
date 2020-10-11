@@ -19,17 +19,6 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
-- bash: |
-    cd $HOME/.dotnet/tools
-    ls -lsa
-    dotnet tool update -g GitVersion.Tool
-    cd $HOME/.dotnet/tools/dotnet-gitversion
-    ls -lsa
-
-- script: |
-    $(Agent.ToolsDirectory)/gitversion/5.1.3/dotnet-gitversion $(Build.SourcesDirectory) /output buildserver /nofetch
-#5.1.3
-#5.3.7
 - pwsh: |
     dotnet tool update -g GitVersion.Tool
     GitVersion /output buildserver /nofetch
@@ -38,7 +27,7 @@ steps:
 
 - bash: |
     dotnet tool update -g GitVersion.Tool
-    $HOME/.dotnet/tools/gitversion /output buildserver /nofetch
+    $HOME/.dotnet/tools/dotnet-gitversion $(Build.SourcesDirectory) /output buildserver /nofetch
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: GitVersion
 
