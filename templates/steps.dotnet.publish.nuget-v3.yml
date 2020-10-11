@@ -19,16 +19,17 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
-- pwsh: dotnet tool update -g GitVersion.Tool
-  displayName: GitVersion (1 of 2)
+- pwsh: |
+    dotnet tool update -g GitVersion.Tool
+    GitVersion /output buildserver /nofetch
+  enabled: eq(variables['Agent.OS'], 'Windows_NT')
+  displayName: GitVersion
 
-- pwsh: GitVersion /output buildserver /nofetch
-  condition: eq(variables['Agent.OS'], 'Windows_NT')
-  displayName: GitVersion (2a of 2)
-
-- bash: $HOME/.dotnet/tools/GitVersion /output buildserver /nofetch
-  condition: eq(variables['Agent.OS'], 'Linux')
-  displayName: GitVersion (2b of 2)
+- bash: |
+    dotnet tool update -g GitVersion.Tool
+    $HOME/.dotnet/tools/GitVersion /output buildserver /nofetch
+  enabled: eq(variables['Agent.OS'], 'Linux')
+  displayName: GitVersion
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
   displayName: UpdateBuildNumber
