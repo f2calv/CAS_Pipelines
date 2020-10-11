@@ -32,11 +32,11 @@ steps:
   displayName: GitVersion (Linux)
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
-  displayName: UpdateBuildNumber
+  displayName: Build.UpdateBuildNumber
 
 - pwsh: Write-Host "##vso[Build.AddBuildTag]$(GitVersion.NuGetVersion)"
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
-  displayName: AddTag
+  displayName: Build.AddBuildTag
 
 - pwsh: |
     git tag $(GitVersion.NuGetVersion)
@@ -76,7 +76,7 @@ steps:
   
 - bash: |
     dotnet tool update -g dotnet-reportgenerator-globaltool
-    $HOME/.dotnet/tools/reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
+    $HOME/.dotnet/tools/dotnet-reportgenerator-globaltool -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.cobertura.xml -targetdir:CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Linux')
   displayName: reportgenerator (Linux)
 
