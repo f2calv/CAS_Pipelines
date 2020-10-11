@@ -19,9 +19,9 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
-#- pwsh: dotnet tool update -g GitVersion.Tool
-
-- pwsh: GitVersion /output buildserver /nofetch
+- pwsh: |
+    dotnet tool update -g GitVersion.Tool
+    GitVersion /output buildserver /nofetch
   displayName: GitVersion
 
 - pwsh: Write-Host "##vso[Build.UpdateBuildNumber]$(GitVersion.NuGetVersion)"
