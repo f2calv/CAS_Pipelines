@@ -81,7 +81,7 @@ steps:
   displayName: dotnet nuget push
 
 - task: GithubRelease@0
-  enabled: ne(parameters.githubConnection, '')
+  enabled: ne(${{ parameters.githubConnection }}, '')
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
   inputs:
     githubConnection: ${{ parameters.githubConnection }}
