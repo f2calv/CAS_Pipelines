@@ -20,7 +20,7 @@ steps:
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
 - pwsh: |
-    dotnet tool update -g GitVersion.Tool
+    #dotnet tool update -g GitVersion.Tool
     GitVersion /output buildserver /nofetch
   condition: eq(variables['Agent.OS'], 'Windows_NT')
   displayName: GitVersion (Windows)
