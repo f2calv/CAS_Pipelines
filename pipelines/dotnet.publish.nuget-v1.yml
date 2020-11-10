@@ -55,7 +55,7 @@ steps:
   displayName: .NET 5.x SDK
   inputs:
     version: 5.x
-    includePreviewVersions: true
+    #includePreviewVersions: true
 
 # - pwsh: dotnet --list-sdks
 #   displayName: dotnet --list-sdks
