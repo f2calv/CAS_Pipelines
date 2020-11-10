@@ -2,6 +2,9 @@ parameters:
 - name: BuildConfiguration
   type: string
   default: release
+- name: buildLogFile
+  type: string
+  default: buildLog.log
 - name: NuGetServerFeedUrl
   type: string
   default: $(NuGetServerFeedUrl)
@@ -55,20 +58,41 @@ steps:
   displayName: .NET 5.x SDK
   inputs:
     version: 5.x
-    includePreviewVersions: true
+    #includePreviewVersions: true
 
 # - pwsh: dotnet --list-sdks
 #   displayName: dotnet --list-sdks
 
-#note: the dotnet restore step is actually unnecessary as dotnet build does a restore by default, but retained for clarity
-#todo: use Cache@2 task for faster restore, but requires packages.lock.json file so skip for now...
-- pwsh: dotnet restore
+- pwsh: dotnet restore --verbosity minimal --configfile nuget.config
   displayName: dotnet restore
 
-- pwsh: dotnet build --nologo -c ${{ parameters.BuildConfiguration }} --verbosity minimal -p:Version='$(GitVersion.NuGetVersion)'
+# - task: DotNetCoreCLI@2
+#   displayName: dotnet restore
+#   inputs:
+#     command: restore
+#     projects: azdo-pipelines-yaml-nuget.sln
+#     feedsToUse: config
+#     nugetConfigPath: nuget.config
+#     verbosityRestore: minimal
+
+- pwsh: dotnet build --no-restore --nologo -p:Version='$(GitVersion.NuGetVersion)' -c ${{ parameters.BuildConfiguration }} /flp:v=q /flp:logfile=${{ parameters.buildLogFile }}
   displayName: dotnet build
 
-- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
+- template: ../templates/steps.dotnet.warnings-v1.yml
+  parameters:
+    buildLogFile: ${{ parameters.buildLogFile }}
+
+# - task: DotNetCoreCLI@2
+#   displayName: dotnet build
+#   enabled: ${{ eq(parameters.BuildMechanism, 'task') }}
+#   inputs:
+#     command: build
+#     projects: Daimler.Van.SPP.Utilities.sln
+#     arguments: --no-restore --nologo -c ${{ parameters.BuildConfiguration }}
+#     versioningScheme: byEnvVar
+#     versionEnvVar: GitVersion.NuGetVersion
+
+- pwsh: dotnet test --no-restore --nologo --no-build -c ${{ parameters.BuildConfiguration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
