@@ -5,7 +5,12 @@ parameters:
 steps:
 #https://github.com/dotwhat/azure-devops-dotnet-warnings
 - pwsh: |
-    $output = Get-Content -Path "$(System.DefaultWorkingDirectory)/${{ parameters.buildLogFile }}"
+    $path = "$(System.DefaultWorkingDirectory)/${{ parameters.buildLogFile }}"
+    if (![System.IO.File]::Exists($path)) {
+      Write-Host "##vso[task.complete result=SucceededWithIssues;]$path does not exist"
+      exit 0
+    }
+    $output = Get-Content -Path $path
     $warnings = $output | Select-String -Pattern ".*:\s"
     $hasErrors = $false
     [regex]$issueTypeRegex = "(warning|error)"
