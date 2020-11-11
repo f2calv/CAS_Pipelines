@@ -92,8 +92,7 @@ steps:
 #     versioningScheme: byEnvVar
 #     versionEnvVar: GitVersion.NuGetVersion
 
-#note: -c ${{ parameters.BuildConfiguration }} removed from dotnet test as it breaks coverlet output
-- pwsh: dotnet test --no-restore --nologo --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
+- pwsh: dotnet test --no-restore --nologo --no-build -c ${{ parameters.BuildConfiguration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
