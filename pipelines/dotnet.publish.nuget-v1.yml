@@ -79,6 +79,8 @@ steps:
   displayName: dotnet build
 
 - template: ../templates/steps.dotnet.warnings-v1.yml
+  parameters:
+    buildLogFile: ${{ parameters.buildLogFile }}
 
 # - task: DotNetCoreCLI@2
 #   displayName: dotnet build
@@ -90,7 +92,7 @@ steps:
 #     versioningScheme: byEnvVar
 #     versionEnvVar: GitVersion.NuGetVersion
 
-- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
+- pwsh: dotnet test --no-restore --nologo --no-build -c ${{ parameters.BuildConfiguration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura -p:Include="${{ parameters.CoverageInclude}}"
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
