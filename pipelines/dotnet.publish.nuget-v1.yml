@@ -87,7 +87,7 @@ steps:
 #   enabled: ${{ eq(parameters.BuildMechanism, 'task') }}
 #   inputs:
 #     command: build
-#     projects: Daimler.Van.SPP.Utilities.sln
+#     projects: azdo-pipelines-yaml-nuget.sln
 #     arguments: --no-restore --nologo -c ${{ parameters.BuildConfiguration }}
 #     versioningScheme: byEnvVar
 #     versionEnvVar: GitVersion.NuGetVersion
