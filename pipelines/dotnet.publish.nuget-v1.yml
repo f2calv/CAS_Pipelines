@@ -47,6 +47,7 @@ steps:
 - pwsh: |
     git tag $(GitVersion.NuGetVersion)
     git push origin --tags
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
   displayName: git tag
 
 - task: UseDotNet@2
