@@ -76,7 +76,7 @@ steps:
 #     nugetConfigPath: nuget.config
 #     verbosityRestore: minimal
 
-- pwsh: dotnet build --no-restore --nologo -p:Version='$(GitVersion.NuGetVersion)' -c ${{ parameters.BuildConfiguration }} /flp:v=q /flp:logfile=${{ parameters.buildLogFile }}
+- pwsh: dotnet build --no-restore --nologo -p:Version='$(GitVersion.NuGetVersion)' -p:SourceRevisionId=$(Build.SourceVersion) -c ${{ parameters.BuildConfiguration }} /flp:v=q /flp:logfile=${{ parameters.buildLogFile }}
   displayName: dotnet build
 
 - template: ../templates/steps.dotnet.warnings-v1.yml
