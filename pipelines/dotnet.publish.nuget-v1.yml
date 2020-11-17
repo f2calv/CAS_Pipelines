@@ -20,6 +20,9 @@ parameters:
 - name: githubConnection
   type: string
   default: ''
+- name: runTests
+  type: boolean
+  default: true
 
 steps:
 - checkout: self
@@ -94,6 +97,7 @@ steps:
 #     versionEnvVar: GitVersion.NuGetVersion
 
 - pwsh: dotnet test --no-restore --nologo --no-build -c ${{ parameters.BuildConfiguration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura #-p:Include="${{ parameters.CoverageInclude}}"
+  enabled: ${{ parameters.runTests }}
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 #- pwsh: dotnet test --nologo -c ${{ parameters.BuildConfiguration }} --no-build --collect:"XPlat Code Coverage"
   displayName: dotnet test
@@ -102,6 +106,7 @@ steps:
     dotnet tool install -g dotnet-reportgenerator-globaltool
     reportgenerator -reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.*.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Windows_NT')
+  enabled: ${{ parameters.runTests }}
   displayName: reportgenerator (Windows)
   
 - bash: |
@@ -110,9 +115,11 @@ steps:
     ls -lsa
     $HOME/.dotnet/tools/reportgenerator '-reports:$(Build.SourcesDirectory)/src/*.Tests/coverage.*.cobertura.xml' -targetdir:$(Build.SourcesDirectory)/CodeCoverage '-reporttypes:HtmlInline_AzurePipelines;Cobertura'
   condition: eq(variables['Agent.OS'], 'Linux')
+  enabled: ${{ parameters.runTests }}
   displayName: reportgenerator (Linux)
 
 - task: PublishCodeCoverageResults@1
+  enabled: ${{ parameters.runTests }}
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: $(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml
