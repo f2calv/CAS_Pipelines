@@ -128,7 +128,7 @@ steps:
 
 - task: GithubRelease@0
   enabled: ${{ ne(parameters.githubConnection, '') }}
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}')) #, not(contains(variables['NuGetServerFeedUrl'], 'pkgs.dev.azure.com'))
   inputs:
     githubConnection: ${{ parameters.githubConnection }}
     action: create
