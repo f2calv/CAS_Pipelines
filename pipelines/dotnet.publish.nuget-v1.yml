@@ -28,6 +28,9 @@ steps:
 - checkout: self
   persistCredentials: true #persist credentials because we need to push a git tag back into the repo
 
+- task: NuGetAuthenticate@0 #run nuget auth to allow access to private azure artifact feed
+  condition: contains(variables['NuGetServerFeedUrl'], 'pkgs.dev.azure.com')
+
 - pwsh: |
     #dotnet tool update -g GitVersion.Tool
     GitVersion $(Build.SourcesDirectory) /output buildserver /nofetch
