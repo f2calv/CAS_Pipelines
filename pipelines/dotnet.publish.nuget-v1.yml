@@ -132,6 +132,15 @@ steps:
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   displayName: dotnet pack
 
+- task: CopyFiles@2
+  inputs:
+    Contents: |
+      *.nupkg
+      *.snupkg
+    targetFolder: $(Build.ArtifactStagingDirectory)
+
+- publish: $(Build.ArtifactStagingDirectory)
+
 - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --skip-duplicate -s $(NuGetServerFeedUrl) --api-key $(NuGetServerApiKey)
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), and(ne(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), ne(variables['Build.Reason'], 'PullRequest'))))
   displayName: dotnet nuget push
