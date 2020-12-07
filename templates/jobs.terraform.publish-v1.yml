@@ -53,30 +53,36 @@ steps:
       Write-Host "##vso[task.setvariable variable=backendAzureRmKey;]${{ parameters.backendAzureRmKey }}"
 
 #todo: make token prefix/suffix changeable?
-- task: qetza.replacetokens.replacetokens-task.replacetokens@3
-  displayName: TF Tokeniser
-  inputs:
-    rootDirectory: ${{ parameters.workingDirectory }}
-    targetFiles: "**/*.tf"
-    escapeType: none
-    tokenPrefix: __
-    tokenSuffix: __
+# - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+#   displayName: TF Tokeniser
+#   inputs:
+#     rootDirectory: ${{ parameters.workingDirectory }}
+#     targetFiles: "**/*.tf"
+#     escapeType: none
+#     tokenPrefix: __
+#     tokenSuffix: __
 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
   displayName: TF Install
   inputs:
     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
 
-- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
-  displayName: TF init
+- task: TerraformCLI@0
+  displayName: terraform init
   inputs:
     command: init
-    workingDirectory: ${{ parameters.workingDirectory }}
-    backendServiceArm: ${{ parameters.azureSubscription }} #Azure resource manager subscription for the terraform backend configuration
-    backendAzureRmResourceGroupName: ${{ parameters.backendAzureRmResourceGroupName }}
-    backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
-    backendAzureRmContainerName: ${{ parameters.backendAzureRmContainerName }}
-    backendAzureRmKey: ${{ parameters.backendAzureRmKey }}
+    commandOptions: -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" -backend-config="container_name=${{ parameters.backendAzureRmContainerName }} -backend-config="key=${{ parameters.backendAzureRmKey }} -backend-config="access_key=${{ parameters.backendAzureRmStorageAccountKey }}" 
+
+# - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+#   displayName: TF init
+#   inputs:
+#     command: init
+#     workingDirectory: ${{ parameters.workingDirectory }}
+#     backendServiceArm: ${{ parameters.azureSubscription }} #Azure resource manager subscription for the terraform backend configuration
+#     backendAzureRmResourceGroupName: ${{ parameters.backendAzureRmResourceGroupName }}
+#     backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
+#     backendAzureRmContainerName: ${{ parameters.backendAzureRmContainerName }}
+#     backendAzureRmKey: ${{ parameters.backendAzureRmKey }}
 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
   ${{ if eq(parameters.destroy, false) }}:
