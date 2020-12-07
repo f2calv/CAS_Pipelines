@@ -62,17 +62,17 @@ steps:
 #     tokenPrefix: __
 #     tokenSuffix: __
 
-# - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
-#   displayName: TF Install
-#   inputs:
-#     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
-
-- task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
   displayName: TF Install
   inputs:
     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
 
-# - task: TerraformCLI@0
+# - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+#   displayName: TF Install
+#   inputs:
+#     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
+
+# - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformCLI@0
 #   displayName: terraform init
 #   inputs:
 #     command: init
