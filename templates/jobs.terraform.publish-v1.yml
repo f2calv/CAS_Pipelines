@@ -71,7 +71,7 @@ steps:
   displayName: terraform init
   inputs:
     command: init
-    commandOptions: -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" -backend-config="container_name=${{ parameters.backendAzureRmContainerName }} -backend-config="key=${{ parameters.backendAzureRmKey }} -backend-config="access_key=${{ parameters.backendAzureRmStorageAccountKey }}" 
+    commandOptions: -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" -backend-config="container_name=${{ parameters.backendAzureRmContainerName }} -backend-config="key=${{ parameters.backendAzureRmKey }} -backend-config="access_key=$(backendAzureRmStorageAccountKey)" 
 
 # - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
 #   displayName: TF init
