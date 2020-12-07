@@ -67,7 +67,7 @@ steps:
 #   inputs:
 #     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
 
-- task: TerraformInstaller@0
+- task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
   displayName: TF Install
   inputs:
     terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
