@@ -1,0 +1,114 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: environment
+  type: string
+  default: $(Environment.Name) #must be explicitly set as this template may not be run inside a deploymentJob
+- name: location
+  type: string
+  default: westeurope #hardcoded default
+- name: backendAzureRmResourceGroupName
+  type: string
+  default: $(backendAzureRmResourceGroupName)
+- name: backendAzureRmStorageAccountName
+  type: string
+  default: $(backendAzureRmStorageAccountName)
+- name: backendAzureRmStorageAccountNameSku
+  type: string
+  default: Standard_LRS #hardcoded default
+- name: backendAzureRmContainerName
+  type: string
+  default: $(backendAzureRmContainerName)
+- name: backendAzureRmKey
+  type: string
+  default: $(backendAzureRmKey)
+- name: workingDirectory
+  type: string
+  default: $(Build.SourcesDirectory)
+- name: destroy
+  type: boolean
+  default: false
+
+steps:
+- task: AzureCLI@2
+  displayName: TF State Storage
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      az group create --location ${{ parameters.location }} --name ${{ parameters.backendAzureRmResourceGroupName }}
+
+      az storage account create --name ${{ parameters.backendAzureRmStorageAccountName }} --resource-group ${{ parameters.backendAzureRmResourceGroupName }} --location ${{ parameters.location }} --sku ${{ parameters.backendAzureRmStorageAccountNameSku }}
+
+      $key = az storage account keys list -g ${{ parameters.backendAzureRmResourceGroupName }} -n ${{ parameters.backendAzureRmStorageAccountName }} --query [0].value -o tsv
+
+      az storage container create --name ${{ parameters.backendAzureRmContainerName }} --account-name ${{ parameters.backendAzureRmStorageAccountName }} --account-key $key
+
+      Write-Host "##vso[task.setvariable variable=backendAzureRmStorageAccountKey;issecret=true;]$key"
+      Write-Host "##vso[task.setvariable variable=backendAzureRmResourceGroupName;]${{ parameters.backendAzureRmResourceGroupName }}"
+      Write-Host "##vso[task.setvariable variable=backendAzureRmStorageAccountName;]${{ parameters.backendAzureRmStorageAccountName }}"
+      Write-Host "##vso[task.setvariable variable=backendAzureRmContainerName;]${{ parameters.backendAzureRmContainerName }}"
+      Write-Host "##vso[task.setvariable variable=backendAzureRmKey;]${{ parameters.backendAzureRmKey }}"
+
+#todo: make token prefix/suffix changeable?
+- task: qetza.replacetokens.replacetokens-task.replacetokens@3
+  displayName: TF Tokeniser
+  inputs:
+    rootDirectory: ${{ parameters.workingDirectory }}
+    targetFiles: "**/*.tf"
+    escapeType: none
+    tokenPrefix: __
+    tokenSuffix: __
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+  displayName: TF Install
+  inputs:
+    terraformVersion: 0.14.0 #Note: Must be kept in sync with the version in the TF files
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  displayName: TF init
+  inputs:
+    command: init
+    workingDirectory: ${{ parameters.workingDirectory }}
+    backendServiceArm: ${{ parameters.azureSubscription }} #Azure resource manager subscription for the terraform backend configuration
+    backendAzureRmResourceGroupName: ${{ parameters.backendAzureRmResourceGroupName }}
+    backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
+    backendAzureRmContainerName: ${{ parameters.backendAzureRmContainerName }}
+    backendAzureRmKey: ${{ parameters.backendAzureRmKey }}
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  ${{ if eq(parameters.destroy, false) }}:
+    displayName: TF plan -out main.tfplan
+  ${{ if eq(parameters.destroy, true) }}:
+    displayName: TF plan -out main.destroy.tfplan -destroy
+  inputs:
+    command: plan
+    ${{ if eq(parameters.destroy, false) }}:
+      commandOptions: -out main.tfplan
+    ${{ if eq(parameters.destroy, true) }}:
+      commandOptions: -out main.destroy.tfplan -destroy
+    workingDirectory: ${{ parameters.workingDirectory }}
+    environmentServiceNameAzureRM: ${{ parameters.azureSubscription }} #Azure Resource Manager subscription for the deployment
+    backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
+    backendAzureRmContainerName: ${{ parameters.backendAzureRmContainerName }}
+    backendAzureRmKey: ${{ parameters.backendAzureRmKey }}
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+  ${{ if eq(parameters.destroy, false) }}:
+    displayName: TF apply -auto-approve main.tfplan
+  ${{ if eq(parameters.destroy, true) }}:
+    displayName: TF destroy -auto-approve
+  inputs:
+    ${{ if eq(parameters.destroy, false) }}:
+      command: apply
+      commandOptions: -auto-approve main.tfplan
+    ${{ if eq(parameters.destroy, true) }}:
+      command: destroy
+      commandOptions: -auto-approve
+    workingDirectory: ${{ parameters.workingDirectory }}
+    environmentServiceNameAzureRM: ${{ parameters.azureSubscription }} #Azure Resource Manager subscription for the deployment
+    backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
+    backendAzureRmContainerName: ${{ parameters.backendAzureRmContainerName }}
+    backendAzureRmKey: ${{ parameters.backendAzureRmKey }}
