@@ -92,15 +92,15 @@ steps:
 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
   ${{ if eq(parameters.destroy, false) }}:
-    displayName: TF plan -out main.tfplan
+    displayName: TF plan -out main
   ${{ if eq(parameters.destroy, true) }}:
-    displayName: TF plan -out main.destroy.tfplan -destroy
+    displayName: TF plan -destroy
   inputs:
     command: plan
     ${{ if eq(parameters.destroy, false) }}:
-      commandOptions: -out main.tfplan
+      commandOptions: -out main
     ${{ if eq(parameters.destroy, true) }}:
-      commandOptions: -out main.destroy.tfplan -destroy
+      commandOptions: -destroy
     workingDirectory: ${{ parameters.workingDirectory }}
     environmentServiceNameAzureRM: ${{ parameters.azureSubscription }} #Azure Resource Manager subscription for the deployment
     backendAzureRmStorageAccountName: ${{ parameters.backendAzureRmStorageAccountName }}
@@ -109,13 +109,13 @@ steps:
 
 - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
   ${{ if eq(parameters.destroy, false) }}:
-    displayName: TF apply -auto-approve main.tfplan
+    displayName: TF apply -auto-approve main
   ${{ if eq(parameters.destroy, true) }}:
     displayName: TF destroy -auto-approve
   inputs:
     ${{ if eq(parameters.destroy, false) }}:
       command: apply
-      commandOptions: -auto-approve main.tfplan
+      commandOptions: -auto-approve main
     ${{ if eq(parameters.destroy, true) }}:
       command: destroy
       commandOptions: -auto-approve
