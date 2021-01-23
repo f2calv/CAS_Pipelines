@@ -17,26 +17,39 @@ steps:
     NAME: ${{ parameters.Name }}
     VALUE: ${{ parameters.Value }}
   displayName: Check for required parameter '${{ parameters.Name }}'
+  failOnStderr: true
+  #condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+  enabled: ${{ eq(variables['Agent.OS'], 'Linux') }}
 
-#- task: PowerShell@2
-#  displayName: Check for required parameter '${{ parameters.Name }}'
-#  inputs:
-#    targetType: inline
-#    script: |
-#      if ([string]::IsNullOrEmpty('${{ parameters.Value }}'')) {
-#        Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '${{ parameters.Name }}'"
-#        Write-Host "##vso[task.complete result=Failed;]"
-#        exit 1
-#      }
-#    pwsh: true
+# - task: PowerShell@2
+#   displayName: Check for required parameter '${{ parameters.Name }}'
+#   inputs:
+#     targetType: inline
+#     script: |
+#       if ([string]::IsNullOrEmpty('${{ parameters.Value }}'')) {
+#         Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '${{ parameters.Name }}'"
+#         Write-Host "##vso[task.complete result=Failed;]"
+#         exit 1
+#       }
+#       else {
+#         Write-Host "Parameter OK, '$($env:NAME)'='$($env:VALUE)'"
+#       }
+#     failOnStderr: true
+#     pwsh: true
 
-#- pwsh: |
-#    if ([string]::IsNullOrEmpty($env:VALUE)) {
-#      Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '$($env:NAME)'"
-#      Write-Host "##vso[task.complete result=Failed;]"
-#      exit 1
-#    }
-#  env:
-#    NAME: ${{ parameters.Name }}
-#    VALUE: ${{ parameters.Value }}
-#  displayName: Check for required parameter '${{ parameters.Name }}'
+- pwsh: |
+    if ([string]::IsNullOrEmpty($env:VALUE)) {
+      Write-Host "##vso[task.LogIssue type=error;]Missing template parameter '$($env:NAME)'"
+      Write-Host "##vso[task.complete result=Failed;]"
+      exit 1
+    }
+    else {
+      Write-Host "Parameter OK, '$($env:NAME)'='$($env:VALUE)'"
+    }
+  env:
+    NAME: ${{ parameters.Name }}
+    VALUE: ${{ parameters.Value }}
+  displayName: Check for required parameter '${{ parameters.Name }}'
+  failOnStderr: true
+  #condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+  enabled: ${{ eq(variables['Agent.OS'], 'Windows_NT') }}

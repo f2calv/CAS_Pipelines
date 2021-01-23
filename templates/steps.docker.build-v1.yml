@@ -26,36 +26,32 @@ parameters:
 - name: acrName
   type: string
   default: $(acrName)
-- name: bashExists
-  type: boolean
-  default: true
 
 steps:
-- ${{ if eq(parameters.bashExists, 'true') }}:
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: repositoryFolder
-      Value: ${{ parameters.repositoryFolder }}
+- template: parameter-check-v1.yml
+  parameters:
+    Name: repositoryFolder
+    Value: ${{ parameters.repositoryFolder }}
 
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: repository
-      Value: ${{ parameters.repository }}
+- template: parameter-check-v1.yml
+  parameters:
+    Name: repository
+    Value: ${{ parameters.repository }}
 
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: azureContainerRegistry
-      Value: ${{ parameters.azureContainerRegistry }}
+- template: parameter-check-v1.yml
+  parameters:
+    Name: azureContainerRegistry
+    Value: ${{ parameters.azureContainerRegistry }}
 
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: PushTagBuildNumber
-      Value: ${{ parameters.PushTagBuildNumber }}
+- template: parameter-check-v1.yml
+  parameters:
+    Name: PushTagBuildNumber
+    Value: ${{ parameters.PushTagBuildNumber }}
 
-  - template: parameter-check-v1.yml
-    parameters:
-      Name: PushTagLatest
-      Value: ${{ parameters.PushTagLatest }}
+- template: parameter-check-v1.yml
+  parameters:
+    Name: PushTagLatest
+    Value: ${{ parameters.PushTagLatest }}
 
 #for custom agent KubernetesAgents (deprecated)
 #- task: DockerInstaller@0
