@@ -8,6 +8,7 @@ parameters:
 
 steps:
 #https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#passing-parameters
+
 - bash: |
     if [ -z "$VALUE" ]; then
       echo "##vso[task.logissue type=error;]Missing template parameter \"$NAME\""
@@ -19,7 +20,9 @@ steps:
   displayName: Check for required parameter '${{ parameters.Name }}'
   failOnStderr: true
   #condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
-  enabled: ${{ eq(variables['Agent.OS'], 'Linux') }}
+  #enabled: ${{ eq(variables['Agent.OS'], 'Linux') }}
+  #enabled: ${{ eq(variables['Agent.OS'], 'Linux') }}  
+  enabled: $[eq(variables['Agent.OS'], 'Linux')]
 
 # - task: PowerShell@2
 #   displayName: Check for required parameter '${{ parameters.Name }}'
@@ -52,4 +55,5 @@ steps:
   displayName: Check for required parameter '${{ parameters.Name }}'
   failOnStderr: true
   #condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
-  enabled: ${{ eq(variables['Agent.OS'], 'Windows_NT') }}
+  #enabled: ${{ eq(variables['Agent.OS'], 'Windows_NT') }}
+  enabled: $[eq(variables['Agent.OS'], 'Windows_NT')]
