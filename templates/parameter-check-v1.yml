@@ -13,6 +13,8 @@ steps:
     if [ -z "$VALUE" ]; then
       echo "##vso[task.logissue type=error;]Missing template parameter \"$NAME\""
       echo "##vso[task.complete result=Failed;]"
+    else
+      echo "Parameter OK, '$NAME'='$VALUE'"
     fi
   env:
     NAME: ${{ parameters.Name }}
