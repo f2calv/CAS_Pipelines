@@ -94,7 +94,7 @@ steps:
 - pwsh: |
     dive ${{ parameters.repository }}:${{ parameters.tag }}
   enabled: ${{ parameters.diveAnalysis }}
-  displayName: Dive Analysis
+  displayName: Dive Analysis #CI=true is set inside custom build agent image
 
 - pwsh: |
     docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
