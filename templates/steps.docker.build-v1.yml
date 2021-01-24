@@ -26,6 +26,9 @@ parameters:
 - name: acrName
   type: string
   default: $(acrName)
+- name: diveAnalysis
+  type: boolean
+  default: false
 
 steps:
 - template: parameter-check-v1.yml
@@ -87,6 +90,11 @@ steps:
     #--pull fails when using an agent-only build image
     #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
     arguments: --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
+
+- pwsh: |
+    dive ${{ parameters.repository }}:${{ parameters.tag }}
+  enabled: ${{ parameters.diveAnalysis }}
+  displayName: Dive Analysis
 
 - pwsh: |
     docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
