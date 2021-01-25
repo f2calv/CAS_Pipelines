@@ -98,18 +98,19 @@ steps:
       --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) `
       --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT) `
       .
-  displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
+  displayName: 'docker build ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: true
 
 - pwsh: |
-    dive ${{ parameters.repository }}:${{ parameters.tag }}
+    dive ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
   enabled: ${{ parameters.diveAnalysis }}
-  displayName: dive ${{ parameters.repository }}:${{ parameters.tag }} #CI=true is set inside custom build agent image
+  displayName: dive ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} #CI=true is set inside custom build agent image
   failOnStderr: true
 
 - pwsh: |
-    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
-  displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
+    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+      ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+  displayName: 'docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
   failOnStderr: true
 
 - ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
@@ -123,8 +124,8 @@ steps:
       command: push
 
   - pwsh: |
-      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
-    displayName: 'docker push ${{ parameters.repository }}:${{ parameters.tag }}'
+      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+    displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
     failOnStderr: true
 
 - ${{ if eq(parameters.PushTagLatest, 'true') }}:
@@ -138,6 +139,6 @@ steps:
       command: push
 
   - pwsh: |
-      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest `
-    displayName: 'docker push ${{ parameters.repository }}:latest'
+      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+    displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
     failOnStderr: true
