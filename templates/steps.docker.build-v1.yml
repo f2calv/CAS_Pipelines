@@ -72,12 +72,21 @@ steps:
 #    Dockerfile: ${{ parameters.repositoryFolder}}/${{ parameters.Dockerfile }}
 #    tags: ${{ parameters.tag }}
 
-#Note: login to ACR is needed when building from base images held within ACR
+#Note: login to ACR is needed when building from base images held within ACR, and of course to push the resultant image!
 - task: Docker@2
   displayName: Login to ACR
+  enabled: false #now we use the AzureCLI task
   inputs:
     command: login
     containerRegistry: ${{ parameters.acrName }}
+
+- task: AzureCLI@2
+  displayName: az acr login -n $(acrName)
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: az acr login -n $acrName
 
 - task: Docker@1
   displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
