@@ -80,8 +80,8 @@ steps:
     containerRegistry: ${{ parameters.acrName }}
 
 - task: Docker@1
-  displayName: 'Build image ${{ parameters.repository }}:${{ parameters.tag }}'
-  enabled: false
+  displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
+  enabled: false #now we use the simpler pwsh task
   inputs:
     imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }}'
     command: build
@@ -103,7 +103,7 @@ steps:
 - pwsh: |
     dive ${{ parameters.repository }}:${{ parameters.tag }}
   enabled: ${{ parameters.diveAnalysis }}
-  displayName: Dive Analysis #CI=true is set inside custom build agent image
+  displayName: dive ${{ parameters.repository }}:${{ parameters.tag }} #CI=true is set inside custom build agent image
 
 - pwsh: |
     docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
@@ -111,18 +111,28 @@ steps:
 
 - ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
   - task: Docker@1
-    displayName: 'Push image (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
+    displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
+    enabled: false #now we use the simpler pwsh task
     inputs:
       azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
       imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
       command: push
 
+  - pwsh: |
+      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+    displayName: 'docker push ${{ parameters.repository }}:${{ parameters.tag }}'
+
 - ${{ if eq(parameters.PushTagLatest, 'true') }}:
   - task: Docker@1
-    displayName: 'Push image (2 of 2) ${{ parameters.repository }}:latest'
+    displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
+    enabled: false #now we use the simpler pwsh task
     inputs:
       azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
       azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
       imageName: '${{ parameters.repository }}:latest'
       command: push
+
+  - pwsh: |
+      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest `
+    displayName: 'docker push ${{ parameters.repository }}:latest'
