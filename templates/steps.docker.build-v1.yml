@@ -99,15 +99,18 @@ steps:
       --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT) `
       .
   displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
+  failOnStderr: true
 
 - pwsh: |
     dive ${{ parameters.repository }}:${{ parameters.tag }}
   enabled: ${{ parameters.diveAnalysis }}
   displayName: dive ${{ parameters.repository }}:${{ parameters.tag }} #CI=true is set inside custom build agent image
+  failOnStderr: true
 
 - pwsh: |
     docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
   displayName: 'Docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }} --> ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
+  failOnStderr: true
 
 - ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
   - task: Docker@1
@@ -122,6 +125,7 @@ steps:
   - pwsh: |
       docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
     displayName: 'docker push ${{ parameters.repository }}:${{ parameters.tag }}'
+    failOnStderr: true
 
 - ${{ if eq(parameters.PushTagLatest, 'true') }}:
   - task: Docker@1
@@ -136,3 +140,4 @@ steps:
   - pwsh: |
       docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest `
     displayName: 'docker push ${{ parameters.repository }}:latest'
+    failOnStderr: true
