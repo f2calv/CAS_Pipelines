@@ -124,7 +124,7 @@ steps:
       command: push
 
   - pwsh: |
-      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+      docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
     displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
     failOnStderr: true
 
@@ -139,6 +139,6 @@ steps:
       command: push
 
   - pwsh: |
-      docker push -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+      docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
     displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
     failOnStderr: true
