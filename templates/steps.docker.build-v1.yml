@@ -81,12 +81,12 @@ steps:
     containerRegistry: ${{ parameters.acrName }}
 
 - task: AzureCLI@2
-  displayName: az acr login -n $(acrName)
+  displayName: az acr login -n ${{ parameters.acrName }}
   inputs:
     azureSubscription: $(azureSubscription)
     scriptType: pscore
     scriptLocation: inlineScript
-    inlineScript: az acr login -n $acrName
+    inlineScript: az acr login -n ${{ parameters.acrName }}
 
 - task: Docker@1
   displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
