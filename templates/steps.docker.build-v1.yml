@@ -98,7 +98,7 @@ steps:
       --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) `
       --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT) `
       .
-  displayName: 'Build image ${{ parameters.repository }}:${{ parameters.tag }}'
+  displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
 
 - pwsh: |
     dive ${{ parameters.repository }}:${{ parameters.tag }}
