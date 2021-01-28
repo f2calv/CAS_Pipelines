@@ -122,32 +122,32 @@ steps:
   displayName: 'docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
   failOnStderr: true
 
-- ${{ if eq(parameters.PushTagBuildNumber, 'true') }}:
-  - task: Docker@1
-    displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
-    enabled: false #now we use the simpler pwsh task
-    inputs:
-      azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-      azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
-      imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
-      command: push
+- task: Docker@1
+  displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
+  enabled: false #now we use the simpler pwsh task
+  inputs:
+    azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
+    azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+    imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
+    command: push
 
-  - pwsh: |
-      docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
-    displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
-    failOnStderr: true
+- pwsh: |
+    docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+  displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
+  enabled: ${{ parameters.PushTagBuildNumber }}
+  failOnStderr: true
 
-- ${{ if eq(parameters.PushTagLatest, 'true') }}:
-  - task: Docker@1
-    displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
-    enabled: false #now we use the simpler pwsh task
-    inputs:
-      azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-      azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
-      imageName: '${{ parameters.repository }}:latest'
-      command: push
+- task: Docker@1
+  displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
+  enabled: false #now we use the simpler pwsh task
+  inputs:
+    azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
+    azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+    imageName: '${{ parameters.repository }}:latest'
+    command: push
 
-  - pwsh: |
-      docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
-    displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
-    failOnStderr: true
+- pwsh: |
+    docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+  displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
+  enabled: ${{ parameters.PushTagLatest }}
+  failOnStderr: true
