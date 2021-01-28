@@ -8,9 +8,9 @@ parameters:
 - name: repository
   type: string
   default: $(repository)
-- name: azureContainerRegistry
+- name: registry
   type: string
-  default: $(azureContainerRegistry)
+  default: $(registry)
 - name: PushTagBuildNumber
   type: boolean
   default: $(PushTagBuildNumber)
@@ -43,8 +43,8 @@ steps:
 
 - template: parameter-check-v1.yml
   parameters:
-    Name: azureContainerRegistry
-    Value: ${{ parameters.azureContainerRegistry }}
+    Name: registry
+    Value: ${{ parameters.registry }}
 
 - template: parameter-check-v1.yml
   parameters:
@@ -66,7 +66,7 @@ steps:
 #- task: Docker@2
 #  displayName: 'Build and Push image ${{ parameters.repository }}:${{ parameters.tag }}'
 #  inputs:
-#    containerRegistry: ${{ parameters.azureContainerRegistry}}
+#    containerRegistry: ${{ parameters.registry}}
 #    repository: ${{ parameters.repository }}
 #    command: buildAndPush
 #    Dockerfile: ${{ parameters.repositoryFolder}}/${{ parameters.Dockerfile }}
@@ -87,12 +87,13 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr login -n ${{ parameters.acrName }}
+    failOnStandardError: true
 
 - task: Docker@1
   displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
   enabled: false #now we use the simpler pwsh task
   inputs:
-    imageName: '${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.tag }}'
+    imageName: '${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.tag }}'
     command: build
     dockerFile: ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }}
     useDefaultContext: false
@@ -102,24 +103,24 @@ steps:
     arguments: --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
 
 - pwsh: |
-    docker build -t ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+    docker build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       -f ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }} `
       --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) `
       --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT) `
       .
-  displayName: 'docker build ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
+  displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: true
 
 - pwsh: |
-    dive ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+    dive ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}
   enabled: ${{ parameters.diveAnalysis }}
-  displayName: dive ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} #CI=true is set inside custom build agent image
+  displayName: dive ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} #CI=true is set inside custom build agent image
   failOnStderr: true
 
 - pwsh: |
-    docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
-      ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
-  displayName: 'docker tag ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest'
+    docker tag ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+      ${{ parameters.registry }}/${{ parameters.repository }}:latest
+  displayName: 'docker tag ${{ parameters.registry }}/${{ parameters.repository }}:latest'
   failOnStderr: true
 
 - task: Docker@1
@@ -127,12 +128,12 @@ steps:
   enabled: false #now we use the simpler pwsh task
   inputs:
     azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-    azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+    azureContainerRegistry: ${{ parameters.registry }}
     imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
     command: push
 
 - pwsh: |
-    docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+    docker push ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}
   displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
   enabled: ${{ parameters.PushTagBuildNumber }}
   failOnStderr: true
@@ -142,12 +143,12 @@ steps:
   enabled: false #now we use the simpler pwsh task
   inputs:
     azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-    azureContainerRegistry: ${{ parameters.azureContainerRegistry }}
+    azureContainerRegistry: ${{ parameters.registry }}
     imageName: '${{ parameters.repository }}:latest'
     command: push
 
 - pwsh: |
-    docker push ${{ parameters.azureContainerRegistry }}/${{ parameters.repository }}:latest
+    docker push ${{ parameters.registry }}/${{ parameters.repository }}:latest
   displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
   enabled: ${{ parameters.PushTagLatest }}
   failOnStderr: true

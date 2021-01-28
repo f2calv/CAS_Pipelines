@@ -37,3 +37,4 @@ steps:
     elseif($warnings.Count -gt 0 -and $hasErrors -eq $false) { Write-Host "##vso[task.complete result=SucceededWithIssues;]There are build warnings" }
   displayName: Display build issues
   condition: succeededOrFailed()
+  failOnStderr: true

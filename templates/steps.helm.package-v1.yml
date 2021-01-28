@@ -4,7 +4,7 @@ parameters:
   default: $(azureSubscription)
 - name: registry
   type: string
-  default: $(acrName).azurecr.io
+  default: $(registry)
 - name: repository
   type: string
   default: $(repository)
@@ -62,3 +62,4 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr helm push -n ${{ parameters.acrName }} $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}-${{ parameters.tag }}.tgz
+    failOnStandardError: true

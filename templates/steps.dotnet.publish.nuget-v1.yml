@@ -46,6 +46,7 @@ steps:
 #      arguments: --skip-duplicate
 - ${{ if ne(parameters.publishVstsFeed, '') }}:
   - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --source ${{ parameters.publishVstsFeed }} --api-key VSTS --skip-duplicate
+    failOnStderr: true
 
 - ${{ if ne(parameters.publishFeedCredentials, '') }}:
   - task: DotNetCoreCLI@2

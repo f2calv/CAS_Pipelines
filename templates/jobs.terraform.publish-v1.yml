@@ -51,6 +51,7 @@ steps:
       Write-Host "##vso[task.setvariable variable=backendAzureRmStorageAccountName;]${{ parameters.backendAzureRmStorageAccountName }}"
       Write-Host "##vso[task.setvariable variable=backendAzureRmContainerName;]${{ parameters.backendAzureRmContainerName }}"
       Write-Host "##vso[task.setvariable variable=backendAzureRmKey;]${{ parameters.backendAzureRmKey }}"
+    failOnStandardError: true
 
 #todo: make token prefix/suffix changeable?
 # - task: qetza.replacetokens.replacetokens-task.replacetokens@3

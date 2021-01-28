@@ -40,6 +40,7 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr helm repo add -n ${{ parameters.acrName }} --verbose
+    failOnStandardError: true
 
 #FYI - if the first helm install (using below update+install arg) fails, you need to run 'purge', which "Remove the release from the store and make its name free for later use"
 #https://github.com/helm/helm/blob/master/docs/helm/helm_delete.md

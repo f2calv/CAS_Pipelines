@@ -39,3 +39,4 @@ steps:
 
 - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --skip-duplicate -s ${{ parameters.NuGetFeedUrl }} --api-key ${{ parameters.NuGetFeedAPIKey }}
   displayName: dotnet nuget push
+  failOnStderr: true
