@@ -1,0 +1,64 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: $(azureSubscription)
+- name: spUsername
+  type: string
+  default: $(spUsername)
+- name: spPassword
+  type: string
+  default: $(spPassword)
+- name: registry
+  type: string
+  default: $(registry)
+- name: repository
+  type: string
+  default: $(repository)
+- name: repositoryPrefix
+  type: string
+  default: charts/
+- name: helmChartVersion
+  type: string
+  default: 0.$(Build.BuildNumber) # i.e. 0.yyyyMMdd.vv  (used to have Build.BuildNumber for images and 0.1.0 for helm chart versions)
+- name: azureResourceGroup
+  type: string
+  default: $(azureResourceGroup)
+- name: kubernetesCluster
+  type: string
+  default: $(kubernetesCluster)
+
+steps:
+- task: AzureCLI@2
+  displayName: helm pull+export+upgrade
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      #set-up kubectl credentials on the agent for the helm upgrade
+      az aks get-credentials -n ${{ parameters.kubernetesCluster }} -g ${{ parameters.azureResourceGroup }} --overwrite-existing
+
+      #authenticate with the registry using a service principle
+      echo ${{ parameters.spPassword }} | helm registry login "${{ parameters.registry }}" --username ${{ parameters.spUsername }} --password-stdin
+
+      #construct the chart reference
+      $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.helmChartVersion }}"
+      Write-Host "chartRef=$chartRef"
+      
+      helm chart pull $chartRef
+
+      helm chart list
+
+      helm chart export $chartRef --destination $(Pipeline.Workspace)/install
+
+      Write-Host "Starting upgrade..."
+
+      helm upgrade `
+        --install `
+        --wait `
+        --version ${{ parameters.helmChartVersion }} `
+        --set image.repository="${{ parameters.registry }}/${{ parameters.repository }}" `
+        --set image.tag="${{ parameters.helmChartVersion }}" `
+        ${{ parameters.repository }} `
+        $(Pipeline.Workspace)/install/${{ parameters.repository }}
+    failOnStandardError: true

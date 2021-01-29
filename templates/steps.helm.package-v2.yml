@@ -1,0 +1,51 @@
+parameters:
+- name: spUsername
+  type: string
+  default: $(spUsername)
+- name: spPassword
+  type: string
+  default: $(spPassword)
+- name: registry
+  type: string
+  default: $(registry)
+- name: repository
+  type: string
+  default: $(repository)
+- name: repositoryPrefix
+  type: string
+  default: charts/
+- name: helmChartVersion
+  type: string
+  default: 0.$(Build.BuildNumber) # i.e. 0.yyyyMMdd.vv  (used to have Build.BuildNumber for images and 0.1.0 for helm chart versions)
+
+steps:
+#this is now part of my agent
+#- task: HelmInstaller@1
+#  displayName: Install Helm 3 (latest)
+#  continueOnError: true
+
+- pwsh: |
+    #authenticate with the registry using a service principle
+    echo ${{ parameters.spPassword }} | helm registry login "${{ parameters.registry }}" --username ${{ parameters.spUsername }} --password-stdin
+
+    #construct the chart reference
+    $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.helmChartVersion }}"
+    Write-Host "chartRef=$chartRef"
+
+    Write-Host "copy all templates to a temporary template sub-folder..."
+    Copy-Item -Path "./${{ parameters.repositoryPrefix }}_templates" -Destination "./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/" -Recurse
+
+    helm package ./${{ parameters.repositoryPrefix }}${{ parameters.repository }} --app-version $(Build.SourceVersion) --version ${{ parameters.helmChartVersion }}
+
+    $chartName = "${{ parameters.repository }}-${{ parameters.helmChartVersion }}.tgz"
+    Write-Host "chartName=$chartName"
+
+    helm chart save $chartName $chartRef
+
+    Copy-Item -Path ./$chartName -Destination $(Build.ArtifactStagingDirectory)
+
+    helm chart push $chartRef
+
+    helm chart list
+  displayName: helm package+save+push
+  failOnStderr: true
