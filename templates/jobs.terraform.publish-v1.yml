@@ -4,7 +4,7 @@ parameters:
   default: $(azureSubscription)
 - name: environment
   type: string
-  default: $(Environment.Name) #must be explicitly set as this template may not be run inside a deploymentJob
+  #default: $(Environment.Name) #must be explicitly set as this template may not be run inside a deploymentJob
 - name: location
   type: string
   default: westeurope #hardcoded default
