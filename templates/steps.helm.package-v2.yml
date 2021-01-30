@@ -16,10 +16,10 @@ parameters:
   default: charts/
 - name: helmChartVersion
   type: string
-  default: 0.$(Build.BuildNumber) # i.e. 0.yyyyMMdd.vv  (used to have Build.BuildNumber for images and 0.1.0 for helm chart versions)
+  default: $(helmChartVersion)
 
 steps:
-#this is now part of my agent
+#this is now part of my self-hosted agent image
 #- task: HelmInstaller@1
 #  displayName: Install Helm 3 (latest)
 #  continueOnError: true
