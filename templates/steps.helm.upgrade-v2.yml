@@ -28,6 +28,9 @@ parameters:
   default: $(kubernetesCluster)
 
 steps:
+- pwsh: Write-Host "##vso[task.setvariable variable=helmChartVersion;]${{ parameters.helmChartVersion }}"
+  displayName: set helmChartVersion #for re-use in subsequent tasks
+
 - task: AzureCLI@2
   displayName: helm pull+export+upgrade
   inputs:
