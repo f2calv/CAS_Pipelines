@@ -14,9 +14,9 @@ parameters:
 - name: repositoryPrefix
   type: string
   default: charts/
-- name: helmChartVersion
+- name: tag
   type: string
-  default: $(helmChartVersion)
+  default: $(tag)
 
 steps:
 #this is now part of my self-hosted agent image
@@ -29,15 +29,15 @@ steps:
     echo ${{ parameters.spPassword }} | helm registry login "${{ parameters.registry }}" --username ${{ parameters.spUsername }} --password-stdin
 
     #construct the chart reference
-    $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.helmChartVersion }}"
+    $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.tag }}"
     Write-Host "chartRef=$chartRef"
 
     Write-Host "copy all templates to a temporary template sub-folder..."
     Copy-Item -Path "./${{ parameters.repositoryPrefix }}_templates" -Destination "./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/" -Recurse
 
-    helm package ./${{ parameters.repositoryPrefix }}${{ parameters.repository }} --app-version $(Build.SourceVersion) --version ${{ parameters.helmChartVersion }}
+    helm package ./${{ parameters.repositoryPrefix }}${{ parameters.repository }} --app-version $(Build.SourceVersion) --version ${{ parameters.tag }}
 
-    $chartName = "${{ parameters.repository }}-${{ parameters.helmChartVersion }}.tgz"
+    $chartName = "${{ parameters.repository }}-${{ parameters.tag }}.tgz"
     Write-Host "chartName=$chartName"
 
     helm chart save $chartName $chartRef

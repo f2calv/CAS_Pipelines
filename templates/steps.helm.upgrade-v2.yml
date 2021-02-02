@@ -17,9 +17,9 @@ parameters:
 - name: repositoryPrefix
   type: string
   default: charts/
-- name: helmChartVersion
+- name: tag
   type: string
-  default: $(helmChartVersion)
+  default: $(tag)
 - name: azureResourceGroup
   type: string
   default: $(azureResourceGroup)
@@ -43,7 +43,7 @@ steps:
       echo ${{ parameters.spPassword }} | helm registry login "${{ parameters.registry }}" --username ${{ parameters.spUsername }} --password-stdin
 
       #construct the chart reference
-      $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.helmChartVersion }}"
+      $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.tag }}"
       Write-Host "chartRef=$chartRef"
       
       helm chart pull $chartRef
@@ -57,9 +57,9 @@ steps:
       helm upgrade `
         --install `
         --wait `
-        --version ${{ parameters.helmChartVersion }} `
+        --version ${{ parameters.tag }} `
         --set image.repository="${{ parameters.registry }}/${{ parameters.repository }}" `
-        --set image.tag="${{ parameters.helmChartVersion }}" `
+        --set image.tag="${{ parameters.tag }}" `
         ${{ parameters.repository }} `
         $(Pipeline.Workspace)/install/${{ parameters.repository }}
     failOnStandardError: true
