@@ -52,13 +52,6 @@ steps:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
   displayName: Build.AddBuildTag
 
-- pwsh: |
-    git tag $(GitVersion.NuGetVersion)
-    git push origin --tags
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
-  displayName: git tag
-  failOnStderr: true
-
 - task: UseDotNet@2
   displayName: .NET Core 3.1.x SDK
   inputs:
@@ -68,23 +61,10 @@ steps:
   displayName: .NET 5.x SDK
   inputs:
     version: 5.x
-    #includePreviewVersions: true
-
-# - pwsh: dotnet --list-sdks
-#   displayName: dotnet --list-sdks
 
 - pwsh: dotnet restore --verbosity minimal --configfile nuget.config
   displayName: dotnet restore
   failOnStderr: true
-
-# - task: DotNetCoreCLI@2
-#   displayName: dotnet restore
-#   inputs:
-#     command: restore
-#     projects: azdo-pipelines-yaml-nuget.sln
-#     feedsToUse: config
-#     nugetConfigPath: nuget.config
-#     verbosityRestore: minimal
 
 - pwsh: dotnet build --no-restore --nologo -p:Version='$(GitVersion.NuGetVersion)' -p:SourceRevisionId=$(Build.SourceVersion) -c ${{ parameters.BuildConfiguration }} /flp:v=q /flp:logfile=${{ parameters.buildLogFile }}
   displayName: dotnet build
@@ -93,16 +73,6 @@ steps:
 - template: ../templates/steps.dotnet.warnings-v1.yml
   parameters:
     buildLogFile: ${{ parameters.buildLogFile }}
-
-# - task: DotNetCoreCLI@2
-#   displayName: dotnet build
-#   enabled: ${{ eq(parameters.BuildMechanism, 'task') }}
-#   inputs:
-#     command: build
-#     projects: azdo-pipelines-yaml-nuget.sln
-#     arguments: --no-restore --nologo -c ${{ parameters.BuildConfiguration }}
-#     versioningScheme: byEnvVar
-#     versionEnvVar: GitVersion.NuGetVersion
 
 - pwsh: dotnet test --no-restore --nologo --no-build -c ${{ parameters.BuildConfiguration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura #-p:Include="${{ parameters.CoverageInclude}}"
   enabled: ${{ parameters.runTests }}
@@ -152,6 +122,13 @@ steps:
 - pwsh: dotnet nuget push $(Build.ArtifactStagingDirectory)/**/*.nupkg --skip-duplicate -s $(NuGetServerFeedUrl) --api-key $(NuGetServerApiKey)
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), and(ne(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'), ne(variables['Build.Reason'], 'PullRequest'))))
   displayName: dotnet nuget push
+  failOnStderr: true
+
+- pwsh: |
+    git tag $(GitVersion.NuGetVersion)
+    git push origin --tags
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
+  displayName: git tag
   failOnStderr: true
 
 - task: GithubRelease@0
