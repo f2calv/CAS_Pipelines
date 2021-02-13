@@ -129,7 +129,8 @@ steps:
     git push origin --tags
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], '${{ parameters.ProdBranch }}'))
   displayName: git tag
-  failOnStderr: true
+  enabled: false #GithubRelease task handles the tagging now
+  failOnStderr: false #git doesn't play well with this
 
 - task: GithubRelease@0
   enabled: ${{ ne(parameters.githubConnection, '') }}
