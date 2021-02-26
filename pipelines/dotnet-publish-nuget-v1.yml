@@ -70,7 +70,7 @@ steps:
   displayName: dotnet build
   failOnStderr: true
 
-- template: ../templates/steps.dotnet.warnings-v1.yml
+- template: ../templates/steps-dotnet-warnings-v1.yml
   parameters:
     buildLogFile: ${{ parameters.buildLogFile }}
 

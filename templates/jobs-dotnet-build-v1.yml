@@ -27,7 +27,7 @@ jobs:
       Name: PublishArtifact
       Value: ${{ parameters.PublishArtifact }}
 
-  - template: steps.dotnet.build-v1.yml
+  - template: steps-dotnet-build-v1.yml
     parameters:
       ProjectName: ${{ parameters.ProjectName }}
       SolutionName: ${{ parameters.SolutionName }}

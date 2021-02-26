@@ -34,7 +34,7 @@ jobs:
       Name: NuGetFeedAPIKey
       Value: ${{ parameters.NuGetFeedAPIKey }}
 
-  - template: steps.dotnet.publish.nuget-v2.yml
+  - template: steps-dotnet-publish-nuget-v2.yml
     parameters:
       packagesToPack: ${{ parameters.packagesToPack }}
       NuGetFeedUrl: ${{ parameters.NuGetFeedUrl }}

@@ -17,7 +17,7 @@ jobs:
       Name: SolutionName
       Value: ${{ parameters.SolutionName }}
   
-  - template: steps.dotnet.test-v1.yml@sharedTemplates
+  - template: steps-dotnet-test-v1.yml@sharedTemplates
     parameters:
       SolutionName: ${{ parameters.SolutionName }}
       InstallDependencies: ${{ parameters.InstallDependencies }}
