@@ -23,12 +23,12 @@ parameters:
 - name: runTests
   type: boolean
   default: true
-- name: services
-  type: object
-  default: {}
+# - name: services
+#   type: object
+#   default: {}
 
-services:
-  ${{ insert }}: ${{ parameters.services }}
+# services:
+#   ${{ insert }}: ${{ parameters.services }}
 
 steps:
 - checkout: self
