@@ -23,6 +23,13 @@ parameters:
 - name: runTests
   type: boolean
   default: true
+- name: serviceName
+  type: string
+  default: ''
+
+${{ if ne(serviceName, '') }}:
+  services:
+    ${{ parameters.serviceName }}: ${{ parameters.serviceName }}
 
 steps:
 - checkout: self
