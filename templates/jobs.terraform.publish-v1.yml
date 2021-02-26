@@ -14,7 +14,7 @@ parameters:
 - name: backendAzureRmStorageAccountName
   type: string
   default: $(backendAzureRmStorageAccountName)
-- name: backendAzureRmStorageAccountNameSku
+- name: backendAzureRmStorageAccountSku
   type: string
   default: Standard_LRS #hardcoded default
 - name: backendAzureRmContainerName
@@ -40,17 +40,13 @@ steps:
     inlineScript: |
       az group create --location ${{ parameters.location }} --name ${{ parameters.backendAzureRmResourceGroupName }}
 
-      az storage account create --name ${{ parameters.backendAzureRmStorageAccountName }} --resource-group ${{ parameters.backendAzureRmResourceGroupName }} --location ${{ parameters.location }} --sku ${{ parameters.backendAzureRmStorageAccountNameSku }}
+      az storage account create --name ${{ parameters.backendAzureRmStorageAccountName }} --resource-group ${{ parameters.backendAzureRmResourceGroupName }} --location ${{ parameters.location }} --sku ${{ parameters.backendAzureRmStorageAccountSku }}
 
       $key = az storage account keys list -g ${{ parameters.backendAzureRmResourceGroupName }} -n ${{ parameters.backendAzureRmStorageAccountName }} --query [0].value -o tsv
 
       az storage container create --name ${{ parameters.backendAzureRmContainerName }} --account-name ${{ parameters.backendAzureRmStorageAccountName }} --account-key $key
 
       Write-Host "##vso[task.setvariable variable=backendAzureRmStorageAccountKey;issecret=true;]$key"
-      Write-Host "##vso[task.setvariable variable=backendAzureRmResourceGroupName;]${{ parameters.backendAzureRmResourceGroupName }}"
-      Write-Host "##vso[task.setvariable variable=backendAzureRmStorageAccountName;]${{ parameters.backendAzureRmStorageAccountName }}"
-      Write-Host "##vso[task.setvariable variable=backendAzureRmContainerName;]${{ parameters.backendAzureRmContainerName }}"
-      Write-Host "##vso[task.setvariable variable=backendAzureRmKey;]${{ parameters.backendAzureRmKey }}"
     failOnStandardError: true
 
 #todo: make token prefix/suffix changeable?

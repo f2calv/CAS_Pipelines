@@ -5,6 +5,9 @@ parameters:
 - name: SolutionName
   type: string
   default:
+- name: buildConfiguration
+  type: string
+  default: $(buildConfiguration)  
 - name: PublishArtifact
   type: boolean
   default: true
@@ -53,7 +56,7 @@ steps:
       projects: |
         **/${{ parameters.ProjectName }}.csproj
         **/${{ parameters.ProjectName }}.Tests.csproj
-      arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
+      arguments: --configuration ${{ parameters.buildConfiguration }} --verbosity minimal --output $(Build.ArtifactStagingDirectory)
       #packagesDirectory: /src/packages
 
 - ${{ if ne(parameters.SolutionName, '') }}:
@@ -65,7 +68,7 @@ steps:
       #projects: |
       #  **/${{ parameters.ProjectName }}.csproj
       #  **/${{ parameters.ProjectName }}.Tests.csproj
-      arguments: --configuration $(buildConfiguration) --verbosity minimal --output $(Build.ArtifactStagingDirectory)
+      arguments: --configuration ${{ parameters.buildConfiguration }} --verbosity minimal --output $(Build.ArtifactStagingDirectory)
       #packagesDirectory: /src/packages
 
 - task: PublishPipelineArtifact@1

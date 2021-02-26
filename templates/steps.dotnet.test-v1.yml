@@ -8,6 +8,9 @@ parameters:
 - name: TestProjectsPath
   type: string
   default: ''
+- name: buildConfiguration
+  type: string
+  default: $(buildConfiguration) 
 
 steps:
 - template: parameter-check-v1.yml
@@ -35,7 +38,7 @@ steps:
     command: test
     #projects: **/*.Tests/*.csproj
     projects: ${{ parameters.SolutionName }}
-    arguments: --configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include="[CasCap.*]*"
+    arguments: --configuration ${{ parameters.buildConfiguration }} /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include="[CasCap.*]*"
     #nobuild: true    #need to figure out PipelineArtifacts
 
 

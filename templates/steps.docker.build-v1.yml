@@ -29,6 +29,12 @@ parameters:
 - name: diveAnalysis
   type: boolean
   default: false
+- name: ARTIFACTS_ENDPOINT
+  type: string
+  default: $(ARTIFACTS_ENDPOINT)
+- name: ARTIFACTS_PAT
+  type: string
+  default: $(ARTIFACTS_PAT)
 
 steps:
 - template: parameter-check-v1.yml
@@ -83,7 +89,7 @@ steps:
 - task: AzureCLI@2
   displayName: az acr login -n ${{ parameters.acrName }}
   inputs:
-    azureSubscription: $(azureSubscription)
+    azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: az acr login -n ${{ parameters.acrName }}
@@ -99,14 +105,14 @@ steps:
     useDefaultContext: false
     addDefaultLabels: false #false enables image caching when building on a self-hosted agent
     #--pull fails when using an agent-only build image
-    #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
-    arguments: --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT)
+    #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }}
+    arguments: --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }}
 
 - pwsh: |
     docker build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       -f ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }} `
-      --build-arg ARTIFACTS_ENDPOINT=$(ARTIFACTS_ENDPOINT) `
-      --build-arg ARTIFACTS_PAT=$(ARTIFACTS_PAT) `
+      --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} `
+      --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} `
       .
   displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: true
