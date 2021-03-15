@@ -34,7 +34,7 @@ steps:
 
 - task: AzureCLI@2
   displayName: az acr helm repo add -n ${{ parameters.acrName }}
-  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: pscore

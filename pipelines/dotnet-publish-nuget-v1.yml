@@ -13,7 +13,7 @@ parameters:
   default: $(NuGetServerApiKey)
 - name: ProdBranch
   type: string
-  default: refs/heads/master #default is set for GitHubFlow branching strategy
+  default: refs/heads/main #default is set for GitHubFlow branching strategy
 - name: CoverageInclude
   type: string
   default: '*'
