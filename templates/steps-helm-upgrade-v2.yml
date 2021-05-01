@@ -54,12 +54,21 @@ steps:
 
       Write-Host "Starting upgrade..."
 
+      $branch = git branch --show-current
+      $commit = git rev-parse HEAD
+      $repo = Split-Path -Leaf (git remote get-url origin)
+
       helm upgrade `
         --install `
         --wait `
         --version ${{ parameters.tag }} `
-        --set image.repository="${{ parameters.registry }}/${{ parameters.repository }}" `
-        --set image.tag="${{ parameters.tag }}" `
+        --set image.tag=${{ parameters.tag }} `
+        --set image.repository=${{ parameters.repository }} `
+        --set image.registry=${{ parameters.registry }} `
+        --set buildID=${{ parameters.tag }} `
+        --set "branch=$branch" `
+        --set "commit=$commit" `
+        --set "repo=$repo" `
         ${{ parameters.repository }} `
         $(Pipeline.Workspace)/install/${{ parameters.repository }}
     failOnStandardError: true
