@@ -77,7 +77,7 @@ steps:
         > $exportFolder
       
       #now lets do the upgrade
-      helm upgrade $chartName $chartFolder `
+      helm upgrade `
         --install `
         --wait `
         --version $tag `
@@ -87,5 +87,6 @@ steps:
         --set buildID=$buildID `
         --set "branch=$branch" `
         --set "commit=$commit" `
-        --set "repo=$repo"
+        --set "repo=$repo" `
+        $chartName $chartFolder`
     failOnStandardError: true
