@@ -58,7 +58,7 @@ steps:
       $chartName = "${{ parameters.repository }}"
       $buildID = "${{ parameters.tag }}"
       $tag = $buildID
-      $branch = git branch --show-current
+      $branch = "$(Build.SourceBranch)"
       $commit = git rev-parse HEAD
       $repo = Split-Path -Leaf (git remote get-url origin)
       $registry = "${{ parameters.registry }}"
@@ -76,7 +76,7 @@ steps:
         --set repo=$repo `
         > $exportFolder
       
-      #now lets do the upgrade
+      #now lets do the upgrade...
       helm upgrade $chartName $chartFolder `
         --install `
         --wait `
@@ -85,7 +85,7 @@ steps:
         --set image.repository=$chartName `
         --set image.registry=$registry `
         --set buildID=$buildID `
-        --set "branch=$branch" `
-        --set "commit=$commit" `
-        --set "repo=$repo"
+        --set branch=$branch `
+        --set commit=$commit `
+        --set repo=$repo
     failOnStandardError: true
