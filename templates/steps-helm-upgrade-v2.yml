@@ -54,21 +54,38 @@ steps:
 
       Write-Host "Starting upgrade..."
 
+      $chartFolder = "$(Pipeline.Workspace)/install/${{ parameters.repository }}"
+      $chartName = $chartFolder.Name
+      $buildID = "${{ parameters.tag }}"
+      $tag = $buildID
       $branch = git branch --show-current
       $commit = git rev-parse HEAD
       $repo = Split-Path -Leaf (git remote get-url origin)
+      $registry = "${{ parameters.registry }}"
+      $exportFolder = "$(Build.ArtifactStagingDirectory)/$chartName.yaml"
 
-      helm upgrade `
+      #dump template to YAML file
+      helm template $chartName $chartFolder `
+        --version $tag `
+        --set image.tag=$tag `
+        --set image.repository=$chartName `
+        --set image.registry=$registry `
+        --set buildID=$buildID `
+        --set branch=$branch `
+        --set commit=$commit `
+        --set repo=$repo `
+        > $exportFolder
+      
+      #now lets do the upgrade
+      helm upgrade $chartName $chartFolder `
         --install `
         --wait `
-        --version ${{ parameters.tag }} `
-        --set image.tag=${{ parameters.tag }} `
-        --set image.repository=${{ parameters.repository }} `
-        --set image.registry=${{ parameters.registry }} `
-        --set buildID=${{ parameters.tag }} `
+        --version $tag `
+        --set image.tag=$tag `
+        --set image.repository=$chartName `
+        --set image.registry=$registry `
+        --set buildID=$buildID `
         --set "branch=$branch" `
         --set "commit=$commit" `
-        --set "repo=$repo" `
-        ${{ parameters.repository }} `
-        $(Pipeline.Workspace)/install/${{ parameters.repository }}
+        --set "repo=$repo"
     failOnStandardError: true
