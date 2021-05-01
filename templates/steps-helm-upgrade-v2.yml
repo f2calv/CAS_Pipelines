@@ -55,7 +55,7 @@ steps:
       Write-Host "Starting upgrade..."
 
       $chartFolder = "$(Pipeline.Workspace)/install/${{ parameters.repository }}"
-      $chartName = $chartFolder.Name
+      $chartName = "${{ parameters.repository }}"
       $buildID = "${{ parameters.tag }}"
       $tag = $buildID
       $branch = git branch --show-current
@@ -77,7 +77,7 @@ steps:
         > $exportFolder
       
       #now lets do the upgrade
-      helm upgrade `
+      helm upgrade $chartName $chartFolder `
         --install `
         --wait `
         --version $tag `
@@ -87,6 +87,5 @@ steps:
         --set buildID=$buildID `
         --set "branch=$branch" `
         --set "commit=$commit" `
-        --set "repo=$repo" `
-        $chartName $chartFolder`
+        --set "repo=$repo"
     failOnStandardError: true
