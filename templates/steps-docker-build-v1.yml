@@ -105,14 +105,17 @@ steps:
     useDefaultContext: false
     addDefaultLabels: false #false enables image caching when building on a self-hosted agent
     #--pull fails when using an agent-only build image
-    #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }}
-    arguments: --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }}
+    #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} --build-arg GIT_COMMIT=$(Build.SourceVersion) --build-arg GIT_BRANCH=$(Build.SourceBranch) --build-arg BUILDID=0.$(Build.BuildNumber)
+    arguments: --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} --build-arg GIT_COMMIT=$(Build.SourceVersion) --build-arg GIT_BRANCH=$(Build.SourceBranch) --build-arg BUILDID=0.$(Build.BuildNumber)
 
 - pwsh: |
     docker build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       -f ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }} `
       --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} `
       --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} `
+      --build-arg GIT_COMMIT=$(Build.SourceVersion) `
+      --build-arg GIT_BRANCH=$(Build.SourceBranch) `
+      --build-arg BUILDID=0.$(Build.BuildNumber) `
       .
   displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: true
