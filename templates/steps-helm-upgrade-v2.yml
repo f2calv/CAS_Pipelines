@@ -4,10 +4,8 @@ parameters:
   default: $(azureSubscription)
 - name: spUsername
   type: string
-  default: $(spUsername)
 - name: spPassword
   type: string
-  default: $(spPassword)
 - name: registry
   type: string
   default: $(registry)
