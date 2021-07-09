@@ -23,15 +23,15 @@ steps:
 #  continueOnError: true
 
 - pwsh: |
-    #authenticate with the registry using a service principle
+    Write-Host "Authenticate with the registry using a service principle..."
     echo ${{ parameters.spPassword }} | helm registry login "${{ parameters.registry }}" --username ${{ parameters.spUsername }} --password-stdin
 
-    #construct the chart reference
+    "Construct the chart reference..."
     $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.tag }}"
     Write-Host "chartRef=$chartRef"
 
     dir
-    Write-Host "copy all templates to a temporary template sub-folder..."
+    Write-Host "Copy all templates to a temporary template sub-folder..."
     Copy-Item -Path "./${{ parameters.repositoryPrefix }}_templates" -Destination "./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/" -Recurse
     cd ./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/
     dir
