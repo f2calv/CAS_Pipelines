@@ -35,6 +35,10 @@ steps:
     Write-Host "Copy all templates to a temporary template sub-folder under '$chartRoot'..."
     Copy-Item -Path "$($chartRoot)_templates" -Destination "$($chartRoot)${{ parameters.repository }}/templates/" -Recurse
 
+    $fileContent = Get-Content "$($chartRoot)Chart.yaml"
+    $fileContent = $fileContent -Replace "<repository>", "${{ parameters.repository }}"
+    Out-File -FilePath "$($chartRoot)${{ parameters.repository }}/Chart.yaml" -InputObject $fileContent -Encoding utf8
+
     helm package "$($chartRoot)${{ parameters.repository }}" --app-version $(Build.SourceVersion) --version ${{ parameters.tag }}
 
     $chartName = "${{ parameters.repository }}-${{ parameters.tag }}.tgz"
