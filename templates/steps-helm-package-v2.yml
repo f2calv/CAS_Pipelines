@@ -30,12 +30,12 @@ steps:
     $chartRef = "${{ parameters.registry }}/${{ parameters.repositoryPrefix }}${{ parameters.repository }}:${{ parameters.tag }}"
     Write-Host "chartRef=$chartRef"
 
-    dir
-    Write-Host "Copy all templates to a temporary template sub-folder..."
-    Copy-Item -Path "./${{ parameters.repositoryPrefix }}_templates" -Destination "./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/" -Recurse
-    cd ./${{ parameters.repositoryPrefix }}${{ parameters.repository }}/templates/
-    dir
-    helm package ./${{ parameters.repositoryPrefix }}${{ parameters.repository }} --app-version $(Build.SourceVersion) --version ${{ parameters.tag }}
+    $chartRoot = "./.argocd/workloads/"
+    
+    Write-Host "Copy all templates to a temporary template sub-folder under '$chartRoot'..."
+    Copy-Item -Path "$($chartRoot)_templates" -Destination "$($chartRoot)${{ parameters.repository }}/templates/" -Recurse
+
+    helm package "$($chartRoot)${{ parameters.repository }}" --app-version $(Build.SourceVersion) --version ${{ parameters.tag }}
 
     $chartName = "${{ parameters.repository }}-${{ parameters.tag }}.tgz"
     Write-Host "chartName=$chartName"
