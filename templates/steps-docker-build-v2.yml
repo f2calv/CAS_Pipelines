@@ -93,7 +93,7 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: |
-      $auth = az acr login -n ${{ parameters.acrName }} | ConvertFrom-Json
+      $auth = az acr login -n ${{ parameters.acrName }} --expose-token | ConvertFrom-Json
       Write-Host "##vso[task.setvariable variable=accessToken;]$($auth.accessToken)"
       Write-Host "##vso[task.setvariable variable=loginServer;]$($auth.loginServer)"
     failOnStandardError: true
