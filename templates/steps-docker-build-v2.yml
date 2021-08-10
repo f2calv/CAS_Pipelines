@@ -79,13 +79,6 @@ steps:
 #    tags: ${{ parameters.tag }}
 
 #Note: login to ACR is needed when building from base images held within ACR, and of course to push the resultant image!
-- task: Docker@2
-  displayName: Login to ACR
-  enabled: false #now we use the AzureCLI task
-  inputs:
-    command: login
-    containerRegistry: ${{ parameters.acrName }}
-
 - task: AzureCLI@2
   displayName: az acr login -n ${{ parameters.acrName }}
   inputs:
@@ -99,23 +92,10 @@ steps:
       Write-Host "##vso[task.setvariable variable=loginServer;]$($auth.loginServer)"
     failOnStandardError: false
 
-- task: Docker@1
-  displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
-  enabled: false #now we use the simpler pwsh task
-  inputs:
-    imageName: '${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.tag }}'
-    command: build
-    dockerFile: ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }}
-    useDefaultContext: false
-    addDefaultLabels: false #false enables image caching when building on a self-hosted agent
-    #--pull fails when using an agent-only build image
-    #arguments: --pull --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} --build-arg GIT_COMMIT=$(Build.SourceVersion) --build-arg GIT_BRANCH=$(Build.SourceBranch) --build-arg BUILDID=0.$(Build.BuildNumber)
-    arguments: --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} --build-arg GIT_COMMIT=$(Build.SourceVersion) --build-arg GIT_BRANCH=$(Build.SourceBranch) --build-arg BUILDID=0.$(Build.BuildNumber)
-
 - pwsh: |
     Write-Host "accessToken=$(accessToken)"
     Write-Host "loginServer=$(loginServer)"
-    docker build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+    podman build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       -f ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }} `
       --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} `
       --build-arg ARTIFACTS_PAT=${{ parameters.ARTIFACTS_PAT }} `
@@ -123,7 +103,7 @@ steps:
       --build-arg GIT_BRANCH=$(Build.SourceBranch) `
       --build-arg BUILDID=0.$(Build.BuildNumber) `
       .
-  displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
+  displayName: 'podman build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: true
 
 - pwsh: |
@@ -133,34 +113,16 @@ steps:
   failOnStderr: true
 
 - pwsh: |
-    docker tag ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
+    podman tag ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       ${{ parameters.registry }}/${{ parameters.repository }}:latest
-  displayName: 'docker tag ${{ parameters.registry }}/${{ parameters.repository }}:latest'
+  displayName: 'podman tag ${{ parameters.registry }}/${{ parameters.repository }}:latest'
   failOnStderr: true
-
-- task: Docker@1
-  displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
-  enabled: false #now we use the simpler pwsh task
-  inputs:
-    azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-    azureContainerRegistry: ${{ parameters.registry }}
-    imageName: '${{ parameters.repository }}:${{ parameters.tag }}'
-    command: push
 
 - pwsh: |
     docker push ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}
   displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
   enabled: ${{ parameters.PushTagBuildNumber }}
   failOnStderr: true
-
-- task: Docker@1
-  displayName: 'docker push (2 of 2) ${{ parameters.repository }}:latest'
-  enabled: false #now we use the simpler pwsh task
-  inputs:
-    azureSubscriptionEndpoint: ${{ parameters.azureSubscription }}
-    azureContainerRegistry: ${{ parameters.registry }}
-    imageName: '${{ parameters.repository }}:latest'
-    command: push
 
 - pwsh: |
     docker push ${{ parameters.registry }}/${{ parameters.repository }}:latest
