@@ -94,10 +94,10 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       $auth = az acr login -n ${{ parameters.acrName }} --expose-token | ConvertFrom-Json
-      Write-Host $auth
-      #Write-Host "##vso[task.setvariable variable=accessToken;]$($auth.accessToken)"
-      #Write-Host "##vso[task.setvariable variable=loginServer;]$($auth.loginServer)"
-    failOnStandardError: true
+      #Write-Host $auth
+      Write-Host "##vso[task.setvariable variable=accessToken;]$($auth.accessToken)"
+      Write-Host "##vso[task.setvariable variable=loginServer;]$($auth.loginServer)"
+    failOnStandardError: false
 
 - task: Docker@1
   displayName: 'docker build ${{ parameters.repository }}:${{ parameters.tag }}'
