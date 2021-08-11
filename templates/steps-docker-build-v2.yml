@@ -93,8 +93,8 @@ steps:
     failOnStandardError: false
 
 - pwsh: |
-    Write-Host "accessToken=$(accessToken)"
-    Write-Host "loginServer=$(loginServer)"
+    #Write-Host "accessToken=$(accessToken)"
+    #Write-Host "loginServer=$(loginServer)"
     podman build -t ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }} `
       -f ${{ parameters.repositoryFolder }}/${{ parameters.Dockerfile }} `
       --build-arg ARTIFACTS_ENDPOINT=${{ parameters.ARTIFACTS_ENDPOINT }} `
@@ -119,7 +119,8 @@ steps:
   failOnStderr: true
 
 - pwsh: |
-    docker push ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}
+    #podman login -u 00000000-0000-0000-0000-000000000000 -p $(accessToken)
+    docker push ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}    
   displayName: 'docker push (1 of 2) ${{ parameters.repository }}:${{ parameters.tag }}'
   enabled: ${{ parameters.PushTagBuildNumber }}
   failOnStderr: true
