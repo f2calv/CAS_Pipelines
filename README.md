@@ -4,7 +4,7 @@ Shared YAML template library used by my open-source projects, for more informati
 
 These templates cover a number of common tasks, including;
 
-- .NET build/test/publish/pack
+- .NET build/test/pack/push
 - Container image builds/maintenance
 - Helm Chart publish to Azure Container Registry (ACR)
 
