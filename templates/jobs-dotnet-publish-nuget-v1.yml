@@ -37,4 +37,4 @@ jobs:
 #    runOnce:
 #      deploy:
 #        steps:
-#        - template: steps-dotnet-publish-nuget-v1.yml@sharedTemplates
+#        - template: steps-dotnet-publish-nuget-v1.yml@CAS_Pipelines
