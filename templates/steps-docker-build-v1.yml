@@ -122,7 +122,7 @@ steps:
       --build-arg BUILD_IMAGE=${{ parameters.BUILD_IMAGE }} `
       .
   displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
-  failOnStderr: false #true throws error on 
+  failOnStderr: true
 
 - pwsh: |
     dive ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}
