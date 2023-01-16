@@ -5,7 +5,6 @@ parameters:
   type: string
 - name: repository
   type: string
-  default: $(repository)
 - name: repositoryPrefix
   type: string
   default: helm
@@ -14,13 +13,6 @@ parameters:
   default: $(tag)
 - name: chartPath
   type: string
-  default: .helm
-- name: isLibraryChart
-  type: boolean
-  default: false
-- name: overrideChartPush
-  type: boolean
-  default: false
 
 steps:
 
