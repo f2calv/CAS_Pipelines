@@ -47,7 +47,7 @@ steps:
 
       printf "\nhelm push...\n"
       #https://helm.sh/docs/helm/helm_push/
-      printf "${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/helm"
+      printf "helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/helm"
       helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/helm
 
       printf "\nsuccess!"
