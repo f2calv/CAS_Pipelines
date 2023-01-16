@@ -1,0 +1,62 @@
+parameters:
+- name: azureSubscription
+  type: string
+- name: registry
+  type: string
+- name: repository
+  type: string
+  default: $(repository)
+- name: repositoryPrefix
+  type: string
+  default: helm
+- name: tag
+  type: string
+  default: $(tag)
+- name: chartPath
+  type: string
+  default: .helm
+- name: isLibraryChart
+  type: boolean
+  default: false
+- name: overrideChartPush
+  type: boolean
+  default: false
+
+steps:
+
+- task: AzureCLI@2
+  displayName: helm package/push
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    scriptType: bash
+    scriptLocation: inlineScript
+    addSpnToEnvironment: true
+    inlineScript: |
+      printf "\nhelm version...\n"
+      helm version
+
+      printf "\nhelm registry login...\n"
+      echo $servicePrincipalKey | helm registry login ${{ parameters.registry }}.azurecr.io --username $servicePrincipalId --password-stdin
+
+      printf "\nUpdate the version+appVersion of the Chart.yaml before packaging...\n"
+      yq -i '.version = "${{ parameters.tag }}"' ${{ parameters.chartPath }}/${{ parameters.repository }}/Chart.yaml
+      yq -i '.appVersion = "${{ parameters.tag }}"' ${{ parameters.chartPath }}/${{ parameters.repository }}/Chart.yaml
+      
+      cat ${{ parameters.chartPath }}/${{ parameters.repository }}/Chart.yaml
+
+      #https://helm.sh/docs/helm/helm_dependency_update/
+      printf "\nhelm dependency update...\n"
+      helm dependency update ${{ parameters.chartPath }}/${{ parameters.repository }}
+
+      #https://helm.sh/docs/helm/helm_lint/
+      printf "\nhelm lint...\n"
+      helm lint ${{ parameters.chartPath }}/${{ parameters.repository }}
+
+      #https://helm.sh/docs/helm/helm_package/
+      printf "\nhelm package...\n"
+      helm package ${{ parameters.chartPath }}/${{ parameters.repository }}
+
+      printf "\nhelm push...\n"
+      #https://helm.sh/docs/helm/helm_push/
+      helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/{{ parameters.repositoryPrefix }}
+    failOnStderr: true
