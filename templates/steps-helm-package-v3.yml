@@ -5,9 +5,6 @@ parameters:
   type: string
 - name: repository
   type: string
-- name: repositoryPrefix
-  type: string
-  default: helm
 - name: tag
   type: string
   default: $(tag)
@@ -50,5 +47,8 @@ steps:
 
       printf "\nhelm push...\n"
       #https://helm.sh/docs/helm/helm_push/
-      helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/{{ parameters.repositoryPrefix }}
+      printf "${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/helm"
+      helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}.azurecr.io/helm
+
+      printf "\nsuccess!"
     failOnStderr: true
