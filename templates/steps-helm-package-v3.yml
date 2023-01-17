@@ -37,13 +37,17 @@ steps:
       printf "\nhelm dependency update...\n"
       helm dependency update ${{ parameters.chartPath }}/${{ parameters.repository }}
 
+      #https://helm.sh/docs/helm/helm_dependency_list/
+      echo "helm dependency list..."
+      helm dependency list ${{ parameters.chartPath }}/${{ parameters.repository }}
+
       #https://helm.sh/docs/helm/helm_lint/
       printf "\nhelm lint...\n"
       helm lint ${{ parameters.chartPath }}/${{ parameters.repository }}
 
       #https://helm.sh/docs/helm/helm_package/
       printf "\nhelm package...\n"
-      helm package ${{ parameters.chartPath }}/${{ parameters.repository }}
+      helm package ${{ parameters.chartPath }}/${{ parameters.repository }} -d $(Build.ArtifactStagingDirectory)
 
       printf "\nhelm push...\n"
       #https://helm.sh/docs/helm/helm_push/
