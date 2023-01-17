@@ -60,7 +60,7 @@ steps:
           --set branch="$(Build.SourceBranch)" \
           --set commit="$(Build.SourceVersion)" \
           --set repo="$(Build.Repository.Name)" \
-          > $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}_manifest.yaml
+          > $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}.yaml
 
       printf "\nhelm push...\n"
       #https://helm.sh/docs/helm/helm_push/
