@@ -64,7 +64,7 @@ steps:
 
       printf "\nhelm push...\n"
       #https://helm.sh/docs/helm/helm_push/
-      helm push ${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}/helm
+      helm push $(Build.ArtifactStagingDirectory)/${{ parameters.repository }}-${{ parameters.tag }}.tgz oci://${{ parameters.registry }}/helm
 
       printf "\nsuccess!"
     failOnStderr: true
