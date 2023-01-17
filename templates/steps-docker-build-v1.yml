@@ -35,9 +35,6 @@ parameters:
 - name: ARTIFACTS_PAT
   type: string
   default: $(ARTIFACTS_PAT)
-- name: BUILD_IMAGE
-  type: string
-  default: ''
 
 steps:
 - template: parameter-check-v1.yml
@@ -119,7 +116,6 @@ steps:
       --build-arg GIT_COMMIT=$(Build.SourceVersion) `
       --build-arg GIT_BRANCH=$(Build.SourceBranch) `
       --build-arg BUILDID=0.$(Build.BuildNumber) `
-      --build-arg BUILD_IMAGE=${{ parameters.BUILD_IMAGE }} `
       .
   displayName: 'docker build ${{ parameters.registry }}/${{ parameters.repository }}:${{ parameters.Tag }}'
   failOnStderr: false #true causes the pipeline to break :/
