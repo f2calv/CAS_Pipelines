@@ -14,7 +14,7 @@ parameters:
 steps:
 
 - task: AzureCLI@2
-  displayName: helm package/push
+  displayName: helm lint/package/push
   inputs:
     azureSubscription: ${{ parameters.azureSubscription }}
     scriptType: bash
